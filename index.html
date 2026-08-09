@@ -7,107 +7,52 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d10">
 <title>Q TIMER</title>
-<link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="icon.png">
-  
+<link rel="apple-touch-icon" href="icon.png">
 <style>
-:root{
-  --bg:#0b0d10;
-  --panel:#171b21;
-  --line:#2b3139;
-  --text:#ffffff;
-  --muted:#8f98a6;
-  --accent:#ffd21c;
-}
+:root{--bg:#0b0d10;--panel:#171b21;--line:#2b3139;--text:#fff;--muted:#8f98a6;--accent:#ffd21c}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
-body{min-height:100vh}
-.app{
-  max-width:700px;
-  margin:0 auto;
-  min-height:100vh;
-  padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
-}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+.app{max-width:700px;margin:auto;min-height:100vh;padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
 .top{display:flex;justify-content:space-between;align-items:flex-start}
 h1{font-size:21px;margin:0 0 4px;font-weight:900;letter-spacing:.04em}
 .sub{font-size:12px;color:var(--muted)}
-.timer{
-  text-align:center;
-  font-variant-numeric:tabular-nums;
-  font-size:56px;
-  font-weight:850;
-  letter-spacing:.02em;
-  margin:34px 0 24px;
-}
+.audioBox{margin:18px 0 8px;background:var(--panel);border-radius:16px;padding:12px}
+.audioRow{display:flex;gap:8px;align-items:center}
+.audioLabel{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;color:#dbe1e8}
+.fileBtn{display:inline-block;background:#232a33;border-radius:12px;padding:10px 12px;font-weight:800;font-size:13px}
+input[type=file]{display:none}
+audio{width:100%;margin-top:10px;height:38px}
+.timer{text-align:center;font-variant-numeric:tabular-nums;font-size:56px;font-weight:850;letter-spacing:.02em;margin:26px 0 20px}
 .controls{display:flex;gap:10px}
-button{
-  appearance:none;
-  -webkit-appearance:none;
-  border:0;
-  border-radius:15px;
-  background:var(--panel);
-  color:var(--text);
-  font-weight:800;
-  font-size:16px;
-  padding:15px 18px;
-}
+button{appearance:none;-webkit-appearance:none;border:0;border-radius:15px;background:var(--panel);color:var(--text);font-weight:800;font-size:16px;padding:15px 18px}
 #start{flex:1}
 #reset{width:100px}
-#cue{
-  width:100%;
-  height:200px;
-  margin-top:12px;
-  border-radius:26px;
-  background:var(--accent);
-  color:#111;
-  font-size:84px;
-  font-weight:950;
-  touch-action:manipulation;
-}
+.mode{display:flex;gap:8px;margin:10px 0}
+.mode button{flex:1;font-size:13px;padding:11px}
+.mode button.active{background:#ffd21c;color:#111}
+#cue{width:100%;height:200px;margin-top:4px;border-radius:26px;background:var(--accent);color:#111;font-size:84px;font-weight:950;touch-action:manipulation}
 #cue:active{transform:scale(.985)}
 .note{text-align:center;color:var(--muted);font-size:12px;margin:10px 0 18px}
 .tools{display:flex;gap:8px;margin-bottom:10px}
 .tools button{flex:1;font-size:13px;padding:11px}
-.item{
-  display:grid;
-  grid-template-columns:50px 110px 1fr 38px;
-  gap:8px;
-  align-items:center;
-  border-top:1px solid var(--line);
-  padding:12px 2px;
-}
-.qn{font-weight:850}
-.tm{font-variant-numeric:tabular-nums;font-size:14px}
-.nameBtn{
-  background:transparent;
-  padding:5px 0;
-  text-align:left;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-}
-.del{background:transparent;color:#838c98;padding:7px}
-.empty{text-align:center;color:#717b87;padding:34px 0}
-input{
-  width:100%;
-  background:transparent;
-  color:white;
-  border:0;
-  border-bottom:1px solid #666;
-  outline:none;
-  font-size:16px;
-  padding:5px 0;
-}
+.item{display:grid;grid-template-columns:50px 110px 1fr 38px;gap:8px;align-items:center;border-top:1px solid var(--line);padding:12px 2px}
+.qn{font-weight:850}.tm{font-variant-numeric:tabular-nums;font-size:14px}.nameBtn{background:transparent;padding:5px 0;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.del{background:transparent;color:#838c98;padding:7px}.empty{text-align:center;color:#717b87;padding:34px 0}
+input[type=text]{width:100%;background:transparent;color:white;border:0;border-bottom:1px solid #666;outline:none;font-size:16px;padding:5px 0}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="top">
-    <div>
-      <h1>Q TIMER</h1>
-      <div class="sub" id="status">準備OK</div>
-    </div>
+    <div><h1>Q TIMER</h1><div class="sub" id="status">準備OK</div></div>
     <div class="sub">LIGHTING CUE</div>
+  </div>
+
+  <div class="audioBox">
+    <div class="audioRow">
+      <div class="audioLabel" id="audioName">音源なし（タイマーのみでも使用可）</div>
+      <label class="fileBtn">音源を選ぶ<input id="audioFile" type="file" accept="audio/*"></label>
+    </div>
+    <audio id="audio" controls preload="metadata"></audio>
   </div>
 
   <div id="timer" class="timer">00:00.000</div>
@@ -117,206 +62,154 @@ input{
     <button id="reset" type="button">RESET</button>
   </div>
 
+  <div class="mode">
+    <button id="modeContinue" class="active" type="button">Qで止めない</button>
+    <button id="modeStop" type="button">Qで止める</button>
+  </div>
+
   <button id="cue" type="button">Q</button>
-  <div class="note">Qを押してもタイマーは止まりません</div>
+  <div class="note" id="modeNote">Qを押してもタイマー・音源は止まりません</div>
 
   <div class="tools">
     <button id="copy" type="button">Qリストをコピー</button>
-    <button id="clear" type="button">全削除</button>
+    <button id="clear" type="button">Qだけ全削除</button>
   </div>
 
   <div id="list"><div class="empty">まだQがありません</div></div>
 </div>
 
 <script>
-(function () {
+(function(){
   "use strict";
 
-  var running = false;
-  var startedAt = 0;
-  var carried = 0;
-  var timerHandle = null;
-  var cues = [];
+  var running=false, startedAt=0, carried=0, loop=null, cues=[];
+  var stopOnCue=false, audioURL=null;
+  var timerEl=document.getElementById("timer"), statusEl=document.getElementById("status");
+  var startEl=document.getElementById("start"), listEl=document.getElementById("list");
+  var audio=document.getElementById("audio"), audioFile=document.getElementById("audioFile");
+  var audioName=document.getElementById("audioName");
 
-  var timerEl = document.getElementById("timer");
-  var statusEl = document.getElementById("status");
-  var startEl = document.getElementById("start");
-  var listEl = document.getElementById("list");
-
-  function nowMs() {
-    return Date.now();
+  function now(){return Date.now()}
+  function hasAudio(){return !!audio.src}
+  function currentElapsed(){
+    if(hasAudio()) return audio.currentTime*1000;
+    return running ? (now()-startedAt)+carried : carried;
   }
-
-  function currentElapsed() {
-    return running ? (nowMs() - startedAt) + carried : carried;
+  function fmt(ms){
+    ms=Math.max(0,Math.floor(ms));
+    var m=Math.floor(ms/60000), s=Math.floor(ms/1000)%60, x=ms%1000;
+    return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")+"."+String(x).padStart(3,"0");
   }
+  function draw(){timerEl.textContent=fmt(currentElapsed())}
+  function startLoop(){stopLoop();loop=setInterval(draw,20)}
+  function stopLoop(){if(loop!==null){clearInterval(loop);loop=null}}
 
-  function formatTime(ms) {
-    ms = Math.max(0, Math.floor(ms));
-    var min = Math.floor(ms / 60000);
-    var sec = Math.floor(ms / 1000) % 60;
-    var milli = ms % 1000;
-
-    return String(min).padStart(2, "0") + ":" +
-           String(sec).padStart(2, "0") + "." +
-           String(milli).padStart(3, "0");
-  }
-
-  function drawTimer() {
-    timerEl.textContent = formatTime(currentElapsed());
-  }
-
-  function startLoop() {
-    stopLoop();
-    timerHandle = setInterval(drawTimer, 20);
-  }
-
-  function stopLoop() {
-    if (timerHandle !== null) {
-      clearInterval(timerHandle);
-      timerHandle = null;
+  function startAll(){
+    if(running) return;
+    if(hasAudio()){
+      audio.play().then(function(){
+        running=true;startEl.textContent="Ⅱ PAUSE";statusEl.textContent="計測中";startLoop();
+      }).catch(function(){ statusEl.textContent="音源を再生できません"; });
+    }else{
+      startedAt=now();
+      running=true;startEl.textContent="Ⅱ PAUSE";statusEl.textContent="計測中";startLoop();
     }
   }
 
-  function toggleStart() {
-    if (!running) {
-      startedAt = nowMs();
-      running = true;
-      startEl.textContent = "Ⅱ PAUSE";
-      statusEl.textContent = "計測中";
-      drawTimer();
-      startLoop();
-    } else {
-      carried = currentElapsed();
-      running = false;
-      stopLoop();
-      drawTimer();
-      startEl.textContent = "▶ RESUME";
-      statusEl.textContent = "一時停止";
-    }
+  function pauseAll(){
+    if(!running) return;
+    if(hasAudio()) audio.pause();
+    else carried=currentElapsed();
+    running=false;stopLoop();draw();
+    startEl.textContent="▶ RESUME";statusEl.textContent="一時停止";
   }
 
-  function addCue() {
-    if (!running) {
-      toggleStart();
-    }
-    cues.push({
-      time: currentElapsed(),
-      name: ""
-    });
-    renderList();
-  }
+  function toggleStart(){ running ? pauseAll() : startAll(); }
 
-  function renderList() {
-    if (cues.length === 0) {
-      listEl.innerHTML = '<div class="empty">まだQがありません</div>';
-      return;
-    }
+  audioFile.addEventListener("change",function(){
+    var f=this.files && this.files[0];
+    if(!f) return;
+    if(audioURL) URL.revokeObjectURL(audioURL);
+    audioURL=URL.createObjectURL(f);
+    audio.src=audioURL;
+    audioName.textContent=f.name;
+    running=false;stopLoop();carried=0;startedAt=0;draw();
+    startEl.textContent="▶ START";statusEl.textContent="音源読み込み完了";
+  });
 
-    listEl.innerHTML = cues.map(function(cue, i) {
-      return '' +
-      '<div class="item">' +
-        '<div class="qn">Q' + (i + 1) + '</div>' +
-        '<div class="tm">' + formatTime(cue.time) + '</div>' +
-        '<button type="button" class="nameBtn" data-name="' + i + '">' +
-          (cue.name || '名前を入力') +
-        '</button>' +
-        '<button type="button" class="del" data-del="' + i + '">×</button>' +
-      '</div>';
+  audio.addEventListener("play",function(){
+    running=true;startEl.textContent="Ⅱ PAUSE";statusEl.textContent="計測中";startLoop();
+  });
+  audio.addEventListener("pause",function(){
+    if(!audio.ended){
+      running=false;stopLoop();draw();startEl.textContent="▶ RESUME";statusEl.textContent="一時停止";
+    }
+  });
+  audio.addEventListener("ended",function(){
+    running=false;stopLoop();draw();startEl.textContent="▶ START";statusEl.textContent="再生終了";
+  });
+  audio.addEventListener("timeupdate",draw);
+  audio.addEventListener("seeked",draw);
+
+  document.getElementById("modeContinue").onclick=function(){
+    stopOnCue=false;
+    this.classList.add("active");document.getElementById("modeStop").classList.remove("active");
+    document.getElementById("modeNote").textContent="Qを押してもタイマー・音源は止まりません";
+  };
+  document.getElementById("modeStop").onclick=function(){
+    stopOnCue=true;
+    this.classList.add("active");document.getElementById("modeContinue").classList.remove("active");
+    document.getElementById("modeNote").textContent="Qを押した瞬間にタイマー・音源を停止します";
+  };
+
+  startEl.onclick=toggleStart;
+
+  document.getElementById("cue").onclick=function(){
+    if(!running) startAll();
+    var t=currentElapsed();
+    cues.push({time:t,name:""});
+    render();
+    if(stopOnCue) setTimeout(pauseAll,0);
+  };
+
+  document.getElementById("reset").onclick=function(){
+    if(hasAudio()){
+      audio.pause();audio.currentTime=0;
+    }
+    running=false;stopLoop();startedAt=0;carried=0;draw();
+    startEl.textContent="▶ START";statusEl.textContent="準備OK";
+    // Q list intentionally preserved
+  };
+
+  document.getElementById("clear").onclick=function(){cues=[];render()};
+
+  document.getElementById("copy").onclick=function(){
+    if(!cues.length)return;
+    var text=cues.map(function(c,i){return "Q"+(i+1)+"\t"+fmt(c.time)+"\t"+c.name}).join("\n");
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){statusEl.textContent="コピーしました"}).catch(function(){prompt("コピーしてください",text)});
+    } else prompt("コピーしてください",text);
+  };
+
+  function render(){
+    if(!cues.length){listEl.innerHTML='<div class="empty">まだQがありません</div>';return}
+    listEl.innerHTML=cues.map(function(c,i){
+      return '<div class="item"><div class="qn">Q'+(i+1)+'</div><div class="tm">'+fmt(c.time)+'</div><button type="button" class="nameBtn" data-n="'+i+'">'+(c.name||"名前を入力")+'</button><button type="button" class="del" data-d="'+i+'">×</button></div>';
     }).join("");
-
-    Array.prototype.forEach.call(
-      document.querySelectorAll("[data-name]"),
-      function(btn) {
-        btn.addEventListener("click", function() {
-          editName(parseInt(btn.getAttribute("data-name"), 10));
-        });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-n]"),function(b){
+      b.onclick=function(){
+        var i=parseInt(this.getAttribute("data-n"),10), row=this.parentNode, old=cues[i].name, inp=document.createElement("input");
+        inp.type="text";inp.value=old;this.replaceWith(inp);inp.focus();inp.select();
+        var done=false;function save(){if(done)return;done=true;cues[i].name=inp.value.trim();render()}
+        inp.onblur=save;inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){inp.value=old;inp.blur()}};
       }
-    );
-
-    Array.prototype.forEach.call(
-      document.querySelectorAll("[data-del]"),
-      function(btn) {
-        btn.addEventListener("click", function() {
-          cues.splice(parseInt(btn.getAttribute("data-del"), 10), 1);
-          renderList();
-        });
-      }
-    );
-  }
-
-  function editName(i) {
-    var row = listEl.querySelectorAll(".item")[i];
-    var oldBtn = row.querySelector(".nameBtn");
-    var input = document.createElement("input");
-    input.value = cues[i].name;
-
-    oldBtn.replaceWith(input);
-    input.focus();
-    input.select();
-
-    var finished = false;
-    function save() {
-      if (finished) return;
-      finished = true;
-      cues[i].name = input.value.trim();
-      renderList();
-    }
-
-    input.addEventListener("blur", save);
-    input.addEventListener("keydown", function(e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        input.blur();
-      }
-      if (e.key === "Escape") {
-        input.value = cues[i].name;
-        input.blur();
-      }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-d]"),function(b){
+      b.onclick=function(){cues.splice(parseInt(this.getAttribute("data-d"),10),1);render()}
     });
   }
 
-  startEl.addEventListener("click", toggleStart);
-
-  document.getElementById("cue").addEventListener("click", addCue);
-
-  document.getElementById("reset").addEventListener("click", function() {
-    running = false;
-    stopLoop();
-    startedAt = 0;
-    carried = 0;
-    cues = [];
-    drawTimer();
-    renderList();
-    startEl.textContent = "▶ START";
-    statusEl.textContent = "準備OK";
-  });
-
-  document.getElementById("clear").addEventListener("click", function() {
-    cues = [];
-    renderList();
-  });
-
-  document.getElementById("copy").addEventListener("click", function() {
-    if (cues.length === 0) return;
-
-    var text = cues.map(function(cue, i) {
-      return "Q" + (i + 1) + "\t" + formatTime(cue.time) + "\t" + cue.name;
-    }).join("\n");
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(function() {
-        statusEl.textContent = "コピーしました";
-      }).catch(function() {
-        window.prompt("コピーしてください", text);
-      });
-    } else {
-      window.prompt("コピーしてください", text);
-    }
-  });
-
-  drawTimer();
-  renderList();
+  draw();render();
 })();
 </script>
 </body>
