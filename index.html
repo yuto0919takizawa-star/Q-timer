@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0d10">
+<title>Q TIMER</title>
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#0b0d10;
+  --panel:#171b21;
+  --line:#2b3139;
+  --text:#ffffff;
+  --muted:#8f98a6;
+  --accent:#ffd21c;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+body{min-height:100vh}
+.app{
+  max-width:700px;
+  margin:0 auto;
+  min-height:100vh;
+  padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+h1{font-size:21px;margin:0 0 4px;font-weight:900;letter-spacing:.04em}
+.sub{font-size:12px;color:var(--muted)}
+.timer{
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+  font-size:56px;
+  font-weight:850;
+  letter-spacing:.02em;
+  margin:34px 0 24px;
+}
+.controls{display:flex;gap:10px}
+button{
+  appearance:none;
+  -webkit-appearance:none;
+  border:0;
+  border-radius:15px;
+  background:var(--panel);
+  color:var(--text);
+  font-weight:800;
+  font-size:16px;
+  padding:15px 18px;
+}
+#start{flex:1}
+#reset{width:100px}
+#cue{
+  width:100%;
+  height:200px;
+  margin-top:12px;
+  border-radius:26px;
+  background:var(--accent);
+  color:#111;
+  font-size:84px;
+  font-weight:950;
+  touch-action:manipulation;
+}
+#cue:active{transform:scale(.985)}
+.note{text-align:center;color:var(--muted);font-size:12px;margin:10px 0 18px}
+.tools{display:flex;gap:8px;margin-bottom:10px}
+.tools button{flex:1;font-size:13px;padding:11px}
+.item{
+  display:grid;
+  grid-template-columns:50px 110px 1fr 38px;
+  gap:8px;
+  align-items:center;
+  border-top:1px solid var(--line);
+  padding:12px 2px;
+}
+.qn{font-weight:850}
+.tm{font-variant-numeric:tabular-nums;font-size:14px}
+.nameBtn{
+  background:transparent;
+  padding:5px 0;
+  text-align:left;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.del{background:transparent;color:#838c98;padding:7px}
+.empty{text-align:center;color:#717b87;padding:34px 0}
+input{
+  width:100%;
+  background:transparent;
+  color:white;
+  border:0;
+  border-bottom:1px solid #666;
+  outline:none;
+  font-size:16px;
+  padding:5px 0;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div>
+      <h1>Q TIMER</h1>
+      <div class="sub" id="status">準備OK</div>
+    </div>
+    <div class="sub">LIGHTING CUE</div>
+  </div>
+
+  <div id="timer" class="timer">00:00.000</div>
+
+  <div class="controls">
+    <button id="start" type="button">▶ START</button>
+    <button id="reset" type="button">RESET</button>
+  </div>
+
+  <button id="cue" type="button">Q</button>
+  <div class="note">Qを押してもタイマーは止まりません</div>
+
+  <div class="tools">
+    <button id="copy" type="button">Qリストをコピー</button>
+    <button id="clear" type="button">全削除</button>
+  </div>
+
+  <div id="list"><div class="empty">まだQがありません</div></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var running = false;
+  var startedAt = 0;
+  var carried = 0;
+  var timerHandle = null;
+  var cues = [];
+
+  var timerEl = document.getElementById("timer");
+  var statusEl = document.getElementById("status");
+  var startEl = document.getElementById("start");
+  var listEl = document.getElementById("list");
+
+  function nowMs() {
+    return Date.now();
+  }
+
+  function currentElapsed() {
+    return running ? (nowMs() - startedAt) + carried : carried;
+  }
+
+  function formatTime(ms) {
+    ms = Math.max(0, Math.floor(ms));
+    var min = Math.floor(ms / 60000);
+    var sec = Math.floor(ms / 1000) % 60;
+    var milli = ms % 1000;
+
+    return String(min).padStart(2, "0") + ":" +
+           String(sec).padStart(2, "0") + "." +
+           String(milli).padStart(3, "0");
+  }
+
+  function drawTimer() {
+    timerEl.textContent = formatTime(currentElapsed());
+  }
+
+  function startLoop() {
+    stopLoop();
+    timerHandle = setInterval(drawTimer, 20);
+  }
+
+  function stopLoop() {
+    if (timerHandle !== null) {
+      clearInterval(timerHandle);
+      timerHandle = null;
+    }
+  }
+
+  function toggleStart() {
+    if (!running) {
+      startedAt = nowMs();
+      running = true;
+      startEl.textContent = "Ⅱ PAUSE";
+      statusEl.textContent = "計測中";
+      drawTimer();
+      startLoop();
+    } else {
+      carried = currentElapsed();
+      running = false;
+      stopLoop();
+      drawTimer();
+      startEl.textContent = "▶ RESUME";
+      statusEl.textContent = "一時停止";
+    }
+  }
+
+  function addCue() {
+    if (!running) {
+      toggleStart();
+    }
+    cues.push({
+      time: currentElapsed(),
+      name: ""
+    });
+    renderList();
+  }
+
+  function renderList() {
+    if (cues.length === 0) {
+      listEl.innerHTML = '<div class="empty">まだQがありません</div>';
+      return;
+    }
+
+    listEl.innerHTML = cues.map(function(cue, i) {
+      return '' +
+      '<div class="item">' +
+        '<div class="qn">Q' + (i + 1) + '</div>' +
+        '<div class="tm">' + formatTime(cue.time) + '</div>' +
+        '<button type="button" class="nameBtn" data-name="' + i + '">' +
+          (cue.name || '名前を入力') +
+        '</button>' +
+        '<button type="button" class="del" data-del="' + i + '">×</button>' +
+      '</div>';
+    }).join("");
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-name]"),
+      function(btn) {
+        btn.addEventListener("click", function() {
+          editName(parseInt(btn.getAttribute("data-name"), 10));
+        });
+      }
+    );
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll("[data-del]"),
+      function(btn) {
+        btn.addEventListener("click", function() {
+          cues.splice(parseInt(btn.getAttribute("data-del"), 10), 1);
+          renderList();
+        });
+      }
+    );
+  }
+
+  function editName(i) {
+    var row = listEl.querySelectorAll(".item")[i];
+    var oldBtn = row.querySelector(".nameBtn");
+    var input = document.createElement("input");
+    input.value = cues[i].name;
+
+    oldBtn.replaceWith(input);
+    input.focus();
+    input.select();
+
+    var finished = false;
+    function save() {
+      if (finished) return;
+      finished = true;
+      cues[i].name = input.value.trim();
+      renderList();
+    }
+
+    input.addEventListener("blur", save);
+    input.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        input.blur();
+      }
+      if (e.key === "Escape") {
+        input.value = cues[i].name;
+        input.blur();
+      }
+    });
+  }
+
+  startEl.addEventListener("click", toggleStart);
+
+  document.getElementById("cue").addEventListener("click", addCue);
+
+  document.getElementById("reset").addEventListener("click", function() {
+    running = false;
+    stopLoop();
+    startedAt = 0;
+    carried = 0;
+    cues = [];
+    drawTimer();
+    renderList();
+    startEl.textContent = "▶ START";
+    statusEl.textContent = "準備OK";
+  });
+
+  document.getElementById("clear").addEventListener("click", function() {
+    cues = [];
+    renderList();
+  });
+
+  document.getElementById("copy").addEventListener("click", function() {
+    if (cues.length === 0) return;
+
+    var text = cues.map(function(cue, i) {
+      return "Q" + (i + 1) + "\t" + formatTime(cue.time) + "\t" + cue.name;
+    }).join("\n");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        statusEl.textContent = "コピーしました";
+      }).catch(function() {
+        window.prompt("コピーしてください", text);
+      });
+    } else {
+      window.prompt("コピーしてください", text);
+    }
+  });
+
+  drawTimer();
+  renderList();
+})();
+</script>
+</body>
+</html>
