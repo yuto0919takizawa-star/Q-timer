@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0d10">
+<title>Q TIMER COUNT v9</title>
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+:root{--bg:#0b0d10;--panel:#171b21;--line:#2b3139;--text:#fff;--muted:#8f98a6;--accent:#ffd21c}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+.app{max-width:700px;margin:auto;min-height:100vh;padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+h1{font-size:21px;margin:0 0 4px;font-weight:900;letter-spacing:.04em}
+.sub{font-size:12px;color:var(--muted)}
+.mediaBox{margin:18px 0 8px;background:var(--panel);border-radius:16px;padding:12px}
+.mediaRow{display:flex;gap:8px;align-items:center}
+.mediaLabel{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;color:#dbe1e8}
+.fileBtn{display:inline-block;background:#232a33;border-radius:12px;padding:10px 12px;font-weight:800;font-size:13px}
+input[type=file]{display:none}
+audio{width:100%;margin-top:10px;height:38px}
+video{width:100%;margin-top:10px;max-height:44vh;aspect-ratio:16/9;object-fit:contain;border-radius:12px;background:#000}
+.mediaBox.videoMode{padding:10px}
+.mediaBox.videoMode .mediaRow{margin-bottom:2px}
+.hidden{display:none!important}
+.timer{text-align:center;font-variant-numeric:tabular-nums;font-size:56px;font-weight:850;letter-spacing:.02em;margin:26px 0 20px}
+.controls{display:flex;gap:10px}
+button{appearance:none;-webkit-appearance:none;border:0;border-radius:15px;background:var(--panel);color:var(--text);font-weight:800;font-size:16px;padding:15px 18px}
+#start{flex:1}
+#reset{width:100px}
+.mode{display:flex;gap:8px;margin:10px 0}
+.mode button{flex:1;font-size:13px;padding:11px}
+.mode button.active{background:var(--accent);color:#111}
+#cue{width:100%;height:146px;margin-top:4px;border-radius:24px;background:var(--accent);color:#111;font-size:68px;font-weight:950;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .06s ease,filter .06s ease,box-shadow .06s ease}
+#cue:active{transform:scale(.985)}
+#cue.flash{filter:brightness(1.45);box-shadow:0 0 0 4px rgba(255,210,28,.35),0 0 38px rgba(255,210,28,.95);transform:scale(.99)}
+.note{text-align:center;color:var(--muted);font-size:12px;margin:10px 0 18px}
+.tools{display:flex;gap:8px;margin-bottom:8px}
+.tools button{flex:1;font-size:13px;padding:11px}
+.listOptions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.listOptions button{font-size:12px;padding:10px 8px;border-radius:11px;background:#11161c;border:1px solid var(--line)}
+.listOptions button.active{background:#232a33;border-color:#57616e}
+.loopBtn{background:#232a33;color:#fff;padding:8px 9px;border-radius:10px;font-size:12px;white-space:nowrap}
+.loopBtn.active{background:var(--accent);color:#111}
+.item{position:relative}
+.item.latest{background:rgba(255,210,28,.045)}
+.item{display:grid;grid-template-columns:46px 78px 1fr 74px 34px;gap:6px;align-items:center;border-top:1px solid var(--line);padding:11px 2px}
+.qn{font-weight:850}.tm{font-variant-numeric:tabular-nums;font-size:14px}.seekBtn{background:transparent;padding:6px 0;text-align:left;color:#fff;font-variant-numeric:tabular-nums;font-size:14px;text-decoration:underline;text-decoration-color:#56606d;text-underline-offset:4px}.nameBtn{background:transparent;padding:5px 0;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.del{background:transparent;color:#838c98;padding:7px}.empty{text-align:center;color:#717b87;padding:34px 0}
+input[type=text]{width:100%;background:transparent;color:white;border:0;border-bottom:1px solid #666;outline:none;font-size:16px;padding:5px 0}
+
+
+.countPanel{margin:10px 0 10px;background:var(--panel);border-radius:16px;padding:10px}
+.countModes{display:flex;gap:7px;margin-bottom:8px}
+.countModes button{flex:1;font-size:12px;padding:9px 8px;border-radius:11px}
+.countModes button.active{background:var(--accent);color:#111}
+.countQuick{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.countField{background:#11161c;border:1px solid var(--line);border-radius:11px;padding:8px 10px;min-width:0}
+.countField label{display:block;font-size:10px;color:var(--muted);margin-bottom:2px}
+.countField input{width:100%;border:0;background:transparent;color:#fff;font-size:20px;font-weight:850;padding:0;outline:none}
+.tapBtn,.anchorBtn,.analyzeBtn{width:100%;font-size:12px;padding:10px 8px;border-radius:11px}
+.analyzeBtn{margin-top:7px;background:#232a33;touch-action:manipulation}
+.analyzeBtn:disabled{opacity:.5}
+.tapBtn{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.countActionRow{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
+.countHint{font-size:10px;color:var(--muted);margin-top:7px;line-height:1.4;text-align:center}
+.barOnly.hiddenCount{display:none}
+.segment{font-size:12px;color:#c8ced6;margin-top:3px}
+
+</style>
+
+<style id="v10-cue-size">
+#cue{
+  min-height:56px !important;
+  height:56px !important;
+  padding:8px 12px !important;
+  font-size:32px !important;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div><h1>Q TIMER</h1><div class="sub" id="status">準備OK</div></div>
+    <div class="sub">LIGHTING CUE</div>
+  </div>
+
+  <div class="countPanel">
+    <div class="countModes">
+      <button id="countDance" class="active" type="button">8カウント</button>
+      <button id="countBars" type="button">小節</button>
+    </div>
+    <div class="countQuick">
+      <div class="countField"><label>BPM</label><input id="bpm" type="number" inputmode="decimal" min="20" max="300" step="0.1" value="120"></div>
+      <button id="tap" class="tapBtn" type="button">TAP TEMPO</button>
+    </div>
+    <button id="analyzeBpm" class="analyzeBtn" type="button">🎧 音源からBPM自動解析</button>
+    <div class="countActionRow">
+      <button id="anchor" class="anchorBtn" type="button">ここを「1拍目」</button>
+      <div class="countField barOnly hiddenCount" id="barField"><label>拍子</label><input id="beatsPerBar" type="number" inputmode="numeric" min="1" max="12" step="1" value="4"></div>
+    </div>
+    <div class="countHint" id="countHint">Q間を 8×n ＋ 余り拍 で表示</div>
+  </div>
+
+  <div class="mediaBox" id="mediaBox">
+    <div class="mediaRow">
+      <div class="mediaLabel" id="mediaName">音源・動画なし（タイマーのみでも使用可）</div>
+      <label class="fileBtn">ファイルを選ぶ<input id="mediaFile" type="file"></label>
+    </div>
+    <audio id="audio" controls preload="metadata" class="hidden"></audio>
+    <video id="video" controls playsinline preload="metadata" class="hidden"></video>
+    <div class="sub" style="margin-top:8px">動画は再生・停止・シークするとQ TIMERも同じ位置に連動します</div>
+  </div>
+
+  <div id="timer" class="timer">00:00.000</div>
+
+  <div class="controls">
+    <button id="start" type="button">▶ START + Q1</button>
+    <button id="reset" type="button">RESET</button>
+  </div>
+
+  <div class="mode">
+    <button id="modeContinue" class="active" type="button">Qで止めない</button>
+    <button id="modeStop" type="button">Qで止める</button>
+  </div>
+
+  <button id="cue" type="button">Q</button>
+  <div class="note" id="modeNote">動画・音源を選ぶとQ1=00:00.000。1拍目ボタンでQ1をその位置に移動できます</div>
+
+  <div class="tools">
+    <button id="copy" type="button">Qリストをコピー</button>
+    <button id="clear" type="button">Qだけ全削除</button>
+  </div>
+  <div class="listOptions">
+    <button id="displayOrder" class="active" type="button">表示：最新Qが上</button>
+    <button id="copyOrder" type="button">コピー：Q1→最新</button>
+  </div>
+
+  <div id="list"><div class="empty">まだQがありません</div></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var running=false, startedAt=0, carried=0, loop=null, cues=[];
+  var stopOnCue=false, objectURL=null, mediaType="none", currentFile=null;
+  var timerEl=document.getElementById("timer"), statusEl=document.getElementById("status");
+  var startEl=document.getElementById("start"), listEl=document.getElementById("list");
+  var mediaFile=document.getElementById("mediaFile"), mediaName=document.getElementById("mediaName"), mediaBox=document.getElementById("mediaBox");
+  var audio=document.getElementById("audio"), video=document.getElementById("video");
+  var countMode="dance", anchorMs=0, tapTimes=[];
+  var newestFirst=true, copyNewestFirst=false, loopRangeIndex=null, cueTouchLock=false;
+  var bpmEl=document.getElementById("bpm"), beatsPerBarEl=document.getElementById("beatsPerBar");
+
+  function activeMedia(){
+    if(mediaType==="audio") return audio;
+    if(mediaType==="video") return video;
+    return null;
+  }
+
+  function now(){return Date.now()}
+  function currentElapsed(){
+    var m=activeMedia();
+    if(m) return (m.currentTime || 0) * 1000;
+    return running ? (now()-startedAt)+carried : carried;
+  }
+  function fmt(ms){
+    ms=Math.max(0,Math.floor(ms));
+    var min=Math.floor(ms/60000), sec=Math.floor(ms/1000)%60;
+    return String(min).padStart(2,"0")+":"+String(sec).padStart(2,"0");
+  }
+  function draw(){timerEl.textContent=fmt(currentElapsed())}
+  function startLoop(){stopLoop();loop=setInterval(draw,20)}
+  function stopLoop(){if(loop!==null){clearInterval(loop);loop=null}}
+
+  function bpm(){var v=parseFloat(bpmEl.value);return (isFinite(v)&&v>0)?v:120;}
+  function beatMs(){return 60000/bpm();}
+  function beatsBetween(a,b){return Math.max(0,(b-a)/beatMs());}
+  function roundedBeatCount(x){return Math.max(0,Math.round(x));}
+  function countLabel(a,b){
+    var beats=roundedBeatCount(beatsBetween(a,b));
+    if(countMode==="dance"){
+      var eights=Math.floor(beats/8), rem=beats%8;
+      if(rem===0) return "8×"+eights+"カウント";
+      return "8×"+eights+" ＋ "+rem+"拍";
+    }else{
+      var per=parseInt(beatsPerBarEl.value,10); if(!isFinite(per)||per<1) per=4;
+      var bars=Math.floor(beats/per), rem2=beats%per;
+      if(rem2===0) return bars+"小節";
+      return bars+"小節 ＋ "+rem2+"拍";
+    }
+  }
+  function updateCountHint(){
+    var barField=document.getElementById("barField");
+    if(countMode==="dance"){
+      document.getElementById("countHint").textContent="Q間を 8×n ＋ 余り拍 で表示";
+      barField.classList.add("hiddenCount");
+    }else{
+      document.getElementById("countHint").textContent="BPMと拍子から Q間を小節数で表示";
+      barField.classList.remove("hiddenCount");
+    }
+  }
+
+
+  function normalizeDetectedBpm(v){
+    while(v<75) v*=2;
+    while(v>190) v/=2;
+    return Math.round(v*10)/10;
+  }
+
+  async function analyzeBpmFromFile(){
+    var btn=document.getElementById("analyzeBpm");
+    if(!currentFile){ statusEl.textContent="先に音源・動画を選んでください"; return; }
+    btn.disabled=true; btn.textContent="解析中…"; statusEl.textContent="BPM解析中…";
+    try{
+      var buf=await currentFile.arrayBuffer();
+      var AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC) throw new Error("AudioContext unsupported");
+      var ctx=new AC();
+      var audioBuf=await new Promise(function(resolve,reject){
+        var copy=buf.slice(0);
+        var p=ctx.decodeAudioData(copy,resolve,reject);
+        if(p&&typeof p.then==="function") p.then(resolve).catch(reject);
+      });
+      var sr=audioBuf.sampleRate;
+      var len=audioBuf.length;
+      var channels=audioBuf.numberOfChannels;
+      var maxSeconds=Math.min(90,audioBuf.duration);
+      var startSeconds=audioBuf.duration>35?Math.min(10,audioBuf.duration*0.12):0;
+      var start=Math.floor(startSeconds*sr), end=Math.min(len,Math.floor((startSeconds+maxSeconds)*sr));
+      var hop=Math.max(1,Math.floor(sr/200)); // 約200Hzのエンベロープ
+      var env=[];
+      var prev=0;
+      for(var i=start;i<end;i+=hop){
+        var sum=0, n=0;
+        var blockEnd=Math.min(i+hop,end);
+        for(var j=i;j<blockEnd;j+=2){
+          var v=0;
+          for(var c=0;c<channels;c++) v+=audioBuf.getChannelData(c)[j];
+          v/=channels;
+          sum+=Math.abs(v); n++;
+        }
+        var e=n?sum/n:0;
+        var onset=Math.max(0,e-prev*0.92);
+        env.push(onset);
+        prev=e;
+      }
+      if(env.length<500) throw new Error("too short");
+      // 平均を引いて強いオンセットを目立たせる
+      var mean=env.reduce(function(a,b){return a+b;},0)/env.length;
+      for(var k=0;k<env.length;k++) env[k]=Math.max(0,env[k]-mean*0.7);
+      var rate=sr/hop;
+      var minB=55,maxB=210;
+      var minLag=Math.floor(rate*60/maxB), maxLag=Math.ceil(rate*60/minB);
+      var bestLag=0,best=-1;
+      for(var lag=minLag;lag<=maxLag;lag++){
+        var score=0;
+        for(var x=lag;x<env.length;x++) score+=env[x]*env[x-lag];
+        // 2倍/半分テンポの候補も少し加点して安定化
+        if(lag*2<env.length){
+          var s2=0; for(var y=lag*2;y<env.length;y+=2) s2+=env[y]*env[y-lag*2];
+          score+=s2*0.12;
+        }
+        if(score>best){best=score;bestLag=lag;}
+      }
+      if(!bestLag||best<=0) throw new Error("no beat");
+      var detected=normalizeDetectedBpm(60*rate/bestLag);
+      bpmEl.value=detected.toFixed(1);
+      render();
+      statusEl.textContent="推定BPM "+detected.toFixed(1)+"（必要ならTAPで微調整）";
+      try{await ctx.close();}catch(e){}
+    }catch(err){
+      console.error(err);
+      statusEl.textContent="自動解析できませんでした。TAP TEMPOで合わせてください";
+    }finally{
+      btn.disabled=false; btn.textContent="🎧 音源からBPM自動解析";
+    }
+  }
+
+
+  function ensureQ1AtZero(){
+    if(cues.length===0){
+      cues.push({time:0,name:""});
+      render();
+    }
+  }
+
+  async function playFromCurrent(){
+    var m=activeMedia();
+    if(m){
+      try{
+        await m.play();
+        running=true;
+        startEl.textContent="Ⅱ PAUSE";
+        statusEl.textContent="計測中";
+        startLoop();
+      }catch(e){
+        statusEl.textContent="このファイルはSafariで再生できません";
+      }
+    }else{
+      startedAt=now();
+      running=true;
+      startEl.textContent="Ⅱ PAUSE";
+      statusEl.textContent="計測中";
+      startLoop();
+    }
+  }
+
+  function pauseAll(){
+    if(!running) return;
+    var m=activeMedia();
+    if(m) m.pause();
+    else carried=currentElapsed();
+    running=false;
+    stopLoop();
+    draw();
+    startEl.textContent="▶ RESUME";
+    statusEl.textContent="一時停止";
+  }
+
+  async function startButtonAction(){
+    if(running){
+      pauseAll();
+      return;
+    }
+
+    var m=activeMedia();
+    var atBeginning = currentElapsed() < 50;
+
+    // 最初のSTARTだけ、Qがまだ1つもなく、再生位置がほぼ0ならQ1を自動作成
+    if(cues.length===0 && atBeginning){
+      if(m){
+        try{m.currentTime=0}catch(e){}
+      }else{
+        carried=0;
+        startedAt=0;
+      }
+      cues.push({time:0,name:""});
+      render();
+    }
+
+    await playFromCurrent();
+  }
+
+  function setMedia(file){
+    currentFile=file;
+    loopRangeIndex=null;
+    if(objectURL) URL.revokeObjectURL(objectURL);
+    objectURL=URL.createObjectURL(file);
+
+    audio.pause(); video.pause();
+    audio.removeAttribute("src"); video.removeAttribute("src");
+    audio.load(); video.load();
+
+    var type=(file.type || "").toLowerCase();
+    var name=(file.name || "").toLowerCase();
+
+    if(type.indexOf("video/")===0 || /\.(mp4|mov|m4v|webm)$/i.test(name)){
+      mediaType="video";
+      video.src=objectURL;
+      video.classList.remove("hidden");
+      audio.classList.add("hidden");
+      mediaBox.classList.add("videoMode");
+    }else{
+      mediaType="audio";
+      audio.src=objectURL;
+      audio.classList.remove("hidden");
+      video.classList.add("hidden");
+      mediaBox.classList.remove("videoMode");
+    }
+
+    mediaName.textContent=file.name || "選択したファイル";
+    running=false;stopLoop();startedAt=0;carried=0;
+    try{ activeMedia().currentTime=0; }catch(e){}
+    cues=[];
+    anchorMs=0; tapTimes=[];
+    ensureQ1AtZero();
+    draw();
+    startEl.textContent="▶ START";
+    statusEl.textContent="ファイル読み込み完了・Q1=00:00.000";
+  }
+
+  mediaFile.addEventListener("change",function(){
+    var file=this.files && this.files[0];
+    if(!file) return;
+    setMedia(file);
+  });
+
+  [audio,video].forEach(function(m){
+    m.addEventListener("play",function(){
+      running=true;startEl.textContent="Ⅱ PAUSE";statusEl.textContent="計測中";startLoop();
+    });
+    m.addEventListener("pause",function(){
+      if(!m.ended){
+        running=false;stopLoop();draw();
+        startEl.textContent=(cues.length===0 && currentElapsed()<50)?"▶ START + Q1":"▶ RESUME";
+        statusEl.textContent="一時停止";
+      }
+    });
+    m.addEventListener("ended",function(){
+      running=false;stopLoop();draw();startEl.textContent="▶ RESUME";statusEl.textContent="再生終了";
+    });
+    m.addEventListener("timeupdate",function(){
+      if(loopRangeIndex!==null && loopRangeIndex<cues.length-1){
+        var endSec=cues[loopRangeIndex+1].time/1000;
+        if(m.currentTime>=endSec-0.025){
+          try{m.currentTime=cues[loopRangeIndex].time/1000}catch(e){}
+          if(m.paused){m.play().catch(function(){});}
+        }
+      }
+      draw();
+    });
+    m.addEventListener("seeked",draw);
+    m.addEventListener("loadedmetadata",draw);
+  });
+
+  document.getElementById("modeContinue").onclick=function(){
+    stopOnCue=false;
+    this.classList.add("active");
+    document.getElementById("modeStop").classList.remove("active");
+    document.getElementById("modeNote").textContent="Qを押してもタイマー・音源・動画は止まりません";
+  };
+
+  document.getElementById("modeStop").onclick=function(){
+    stopOnCue=true;
+    this.classList.add("active");
+    document.getElementById("modeContinue").classList.remove("active");
+    document.getElementById("modeNote").textContent="Qを押した瞬間にタイマー・音源・動画を停止します";
+  };
+
+
+  document.getElementById("countDance").onclick=function(){countMode="dance";this.classList.add("active");document.getElementById("countBars").classList.remove("active");updateCountHint();render();};
+  document.getElementById("countBars").onclick=function(){countMode="bars";this.classList.add("active");document.getElementById("countDance").classList.remove("active");updateCountHint();render();};
+  bpmEl.oninput=render;
+  beatsPerBarEl.oninput=render;
+  var tapBtn=document.getElementById("tap");
+  function registerTempoTap(){
+    var t=Date.now(); tapTimes.push(t); if(tapTimes.length>6) tapTimes.shift();
+    if(tapTimes.length>=2){
+      var diffs=[]; for(var i=1;i<tapTimes.length;i++) diffs.push(tapTimes[i]-tapTimes[i-1]);
+      var avg=diffs.reduce(function(a,b){return a+b},0)/diffs.length;
+      var v=60000/avg; if(v>=20&&v<=300){bpmEl.value=v.toFixed(1);render();statusEl.textContent="BPM "+v.toFixed(1);}
+    }
+  }
+  var touchTapHandled=false;
+  tapBtn.addEventListener("touchend",function(e){
+    e.preventDefault();
+    touchTapHandled=true;
+    registerTempoTap();
+    setTimeout(function(){touchTapHandled=false;},350);
+  },{passive:false});
+  tapBtn.addEventListener("click",function(e){
+    if(touchTapHandled){e.preventDefault();return;}
+    registerTempoTap();
+  });
+  document.getElementById("analyzeBpm").onclick=analyzeBpmFromFile;
+  document.getElementById("anchor").onclick=function(){
+    anchorMs=currentElapsed();
+    if(cues.length===0){
+      cues.push({time:anchorMs,name:""});
+    }else{
+      cues[0].time=anchorMs;
+    }
+    render();
+    statusEl.textContent="Q1 / 1拍目を "+fmt(anchorMs)+" に設定";
+  };
+
+  startEl.onclick=startButtonAction;
+
+  var cueBtn=document.getElementById("cue");
+  function flashCue(){
+    cueBtn.classList.remove("flash");
+    void cueBtn.offsetWidth;
+    cueBtn.classList.add("flash");
+    setTimeout(function(){cueBtn.classList.remove("flash");},140);
+  }
+  function addCueNow(){
+    var t=currentElapsed();
+    cues.push({time:t,name:""});
+    flashCue();
+    if(navigator.vibrate){try{navigator.vibrate(18)}catch(e){}}
+    statusEl.textContent="Q"+cues.length+" 追加  "+fmt(t);
+    render();
+    if(stopOnCue && running){setTimeout(pauseAll,0);}
+  }
+  if(window.PointerEvent){
+    cueBtn.addEventListener("pointerdown",function(e){
+      e.preventDefault();
+      addCueNow();
+    },{passive:false});
+  }else{
+    cueBtn.addEventListener("touchstart",function(e){
+      e.preventDefault(); cueTouchLock=true; addCueNow();
+      setTimeout(function(){cueTouchLock=false;},500);
+    },{passive:false});
+    cueBtn.addEventListener("click",function(e){
+      if(cueTouchLock){e.preventDefault();return;} addCueNow();
+    });
+  }
+
+  document.getElementById("reset").onclick=function(){
+    var m=activeMedia();
+    if(m){
+      m.pause();
+      try{m.currentTime=0}catch(e){}
+    }
+    loopRangeIndex=null;
+    running=false;stopLoop();startedAt=0;carried=0;draw();
+    startEl.textContent=(cues.length===0)?"▶ START + Q1":"▶ START";
+    statusEl.textContent="準備OK";
+  };
+
+  document.getElementById("clear").onclick=function(){
+    loopRangeIndex=null;
+    cues=[];
+    render();
+    if(!running && currentElapsed()<50) startEl.textContent="▶ START + Q1";
+  };
+
+  document.getElementById("displayOrder").onclick=function(){
+    newestFirst=!newestFirst;
+    this.textContent=newestFirst?"表示：最新Qが上":"表示：Q1が上";
+    this.classList.toggle("active",newestFirst);
+    render();
+  };
+
+  document.getElementById("copyOrder").onclick=function(){
+    copyNewestFirst=!copyNewestFirst;
+    this.textContent=copyNewestFirst?"コピー：最新→Q1":"コピー：Q1→最新";
+    this.classList.toggle("active",copyNewestFirst);
+  };
+
+  document.getElementById("copy").onclick=function(){
+    if(!cues.length)return;
+    var indices=[];
+    for(var i=0;i<cues.length;i++) indices.push(i);
+    if(copyNewestFirst) indices.reverse();
+    var lines=[];
+    indices.forEach(function(idx){
+      var c=cues[idx];
+      lines.push("Q"+(idx+1)+"\t"+fmt(c.time)+"\t"+c.name);
+      if(!copyNewestFirst && idx<cues.length-1) lines.push("  → "+countLabel(c.time,cues[idx+1].time));
+      if(copyNewestFirst && idx>0) lines.push("  ← "+countLabel(cues[idx-1].time,c.time));
+    });
+    var text=lines.join("\n");
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){statusEl.textContent="コピーしました（"+(copyNewestFirst?"最新→Q1":"Q1→最新")+"）"}).catch(function(){prompt("コピーしてください",text)});
+    }else{prompt("コピーしてください",text);}
+  };
+
+  function stopRangeLoop(message){
+    loopRangeIndex=null;
+    render();
+    if(message) statusEl.textContent=message;
+  }
+
+  async function playCueRange(i){
+    if(i<0 || i>=cues.length-1) return;
+    var m=activeMedia();
+    if(!m){statusEl.textContent="区間リピートは音源・動画選択時に使えます";return;}
+    if(loopRangeIndex===i){
+      loopRangeIndex=null;
+      m.pause();
+      render();
+      statusEl.textContent="Q"+(i+1)+"→Q"+(i+2)+" リピート停止";
+      return;
+    }
+    loopRangeIndex=i;
+    try{m.currentTime=cues[i].time/1000}catch(e){}
+    render();
+    statusEl.textContent="Q"+(i+1)+"→Q"+(i+2)+" リピート中";
+    try{await m.play();}catch(e){statusEl.textContent="再生できませんでした";}
+  }
+
+  function render(){
+    if(!cues.length){
+      listEl.innerHTML='<div class="empty">まだQがありません</div>';
+      return;
+    }
+    var indices=[];
+    for(var z=0;z<cues.length;z++) indices.push(z);
+    if(newestFirst) indices.reverse();
+    listEl.innerHTML=indices.map(function(i){
+      var c=cues[i];
+      var seg=(i<cues.length-1)?'<div class="segment" style="grid-column:2 / 5">→ '+countLabel(c.time,cues[i+1].time)+'</div>':'';
+      var loop=(i<cues.length-1)?'<button type="button" class="loopBtn '+(loopRangeIndex===i?'active':'')+'" data-loop="'+i+'">'+(loopRangeIndex===i?'■ STOP':'↻ Q'+(i+1)+'→Q'+(i+2))+'</button>':'<span></span>';
+      return '<div class="item '+(i===cues.length-1?'latest':'')+'">'+
+        '<div class="qn">Q'+(i+1)+'</div>'+
+        '<button type="button" class="seekBtn" data-seek="'+i+'">'+fmt(c.time)+'</button>'+
+        '<button type="button" class="nameBtn" data-n="'+i+'">'+(c.name||"名前を入力")+'</button>'+
+        loop+
+        '<button type="button" class="del" data-d="'+i+'">×</button>'+seg+
+      '</div>';
+    }).join("");
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-loop]"),function(b){
+      b.onclick=function(){playCueRange(parseInt(this.getAttribute("data-loop"),10));};
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-seek]"),function(b){
+      b.onclick=function(){
+        loopRangeIndex=null;
+        var i=parseInt(this.getAttribute("data-seek"),10);
+        var m=activeMedia();
+        var t=cues[i].time;
+        if(m){
+          try{m.currentTime=t/1000}catch(e){}
+          draw(); render(); statusEl.textContent="Q"+(i+1)+"へ移動";
+        }else{
+          if(running) pauseAll();
+          carried=t; startedAt=now(); draw(); render();
+          startEl.textContent="▶ RESUME"; statusEl.textContent="Q"+(i+1)+"へ移動";
+        }
+      };
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-n]"),function(b){
+      b.onclick=function(){
+        var i=parseInt(this.getAttribute("data-n"),10), old=cues[i].name;
+        var inp=document.createElement("input"); inp.type="text"; inp.value=old;
+        this.replaceWith(inp); inp.focus(); inp.select();
+        var done=false;
+        function save(){if(done)return;done=true;cues[i].name=inp.value.trim();render();}
+        inp.onblur=save;
+        inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){inp.value=old;inp.blur()}};
+      };
+    });
+
+    Array.prototype.forEach.call(document.querySelectorAll("[data-d]"),function(b){
+      b.onclick=function(){
+        var i=parseInt(this.getAttribute("data-d"),10);
+        loopRangeIndex=null;
+        cues.splice(i,1); render();
+      };
+    });
+  }
+
+  [audio,video].forEach(function(m){
+    m.addEventListener("play",function(){
+      if(cues.length===0 && (m.currentTime||0)<0.75){
+        ensureQ1AtZero();
+      }
+      running=true;
+      startEl.textContent="Ⅱ PAUSE";
+      statusEl.textContent="計測中";
+      startLoop();
+    });
+    m.addEventListener("pause",function(){
+      if(!m.ended){
+        running=false;
+        stopLoop();
+        draw();
+        startEl.textContent="▶ RESUME";
+      }
+    });
+    m.addEventListener("seeked",draw);
+    m.addEventListener("timeupdate",function(){
+      if(loopRangeIndex!==null && loopRangeIndex<cues.length-1){
+        var endSec=cues[loopRangeIndex+1].time/1000;
+        if(m.currentTime>=endSec-0.025){
+          try{m.currentTime=cues[loopRangeIndex].time/1000}catch(e){}
+          if(m.paused){m.play().catch(function(){});}
+        }
+      }
+      draw();
+    });
+  });
+
+  updateCountHint();
+  draw();
+  render();
+})();
+</script>
+</body>
+</html>
