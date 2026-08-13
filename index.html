@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d10">
-<title>Q TIMER v11</title>
+<title>Q TIMER v12</title>
 <link rel="apple-touch-icon" href="icon.png">
 <style>
 :root{--bg:#0b0d10;--panel:#171b21;--panel2:#11161c;--line:#2b3139;--text:#fff;--muted:#8f98a6;--accent:#ffd21c;--ok:#34c759;--danger:#ff453a}
@@ -49,6 +49,8 @@ audio{width:100%;margin-top:9px;height:38px}video{width:100%;margin-top:9px;max-
 .editInput{width:100%;background:transparent;color:white;border:0;border-bottom:1px solid #666;border-radius:0;outline:none;font-size:14px;padding:4px 0}
 .editorMediaHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}.editorMediaHead .name{font-size:12px;color:#dbe1e8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.miniBtn{font-size:11px;padding:8px 9px}
 @media(max-width:430px){.timer{font-size:50px}.item{grid-template-columns:38px 69px 1fr 58px 28px}.grid3{grid-template-columns:1fr 1fr}.grid3>*:last-child{grid-column:1 / -1}}
+
+.backupGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.backupGrid button,.backupGrid .fileBtn{width:100%;font-size:13px;padding:12px 10px}.backupNote{font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px}
 </style>
 </head>
 <body>
@@ -74,6 +76,15 @@ audio{width:100%;margin-top:9px;height:38px}video{width:100%;margin-top:9px;max-
       <div class="cardTitle">保存した曲</div>
       <div id="projectList"></div>
     </div>
+    <div class="card">
+      <div class="cardTitle">バックアップ</div>
+      <div class="backupGrid">
+        <button id="exportBackup" class="secondary" type="button">バックアップを保存</button>
+        <label class="fileBtn">バックアップを復元<input id="importBackup" type="file" accept="application/json,.json,.qtimer-backup"></label>
+      </div>
+      <div class="backupNote">保存した曲・設定・Qリストを1つのバックアップファイルとしてiPhoneの「ファイル」に保存できます。音源・動画本体はバックアップに含みません。</div>
+    </div>
+
   </section>
 
   <section id="screenSettings" class="screen">
@@ -170,6 +181,42 @@ function markSaved(){saveState.textContent="保存済み";saveState.style.backgr
 function setStatus(msg){statusEl.textContent=msg}
 function loadProjectIndex(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]")||[]}catch(e){return []}}
 function writeProjectIndex(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr))}
+function safeBackupDate(){var d=new Date(),pad=function(n){return String(n).padStart(2,"0")};return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"_"+pad(d.getHours())+pad(d.getMinutes())}
+async function exportBackup(){
+  try{
+    if(currentProject&&saveState.textContent==="未保存"){await saveCurrentProject()}
+    var projects=loadProjectIndex();
+    var payload={app:"Q TIMER",format:"qtimer-backup",version:1,exportedAt:new Date().toISOString(),projects:projects};
+    var text=JSON.stringify(payload,null,2),name="Q_TIMER_backup_"+safeBackupDate()+".json";
+    var file=new File([text],name,{type:"application/json"});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:"Q TIMER バックアップ"});
+      setStatus("バックアップを共有しました。「ファイルに保存」を選べます");
+    }else{
+      var blob=new Blob([text],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+      a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},3000);
+      setStatus("バックアップを書き出しました");
+    }
+  }catch(e){
+    if(e&&e.name==="AbortError"){setStatus("バックアップ保存をキャンセルしました");return}
+    console.error(e);alert("バックアップを保存できませんでした");
+  }
+}
+async function importBackupFile(file){
+  if(!file)return;
+  try{
+    var text=await file.text(),data=JSON.parse(text),projects;
+    if(Array.isArray(data))projects=data;
+    else if(data&&data.format==="qtimer-backup"&&Array.isArray(data.projects))projects=data.projects;
+    else throw new Error("invalid backup");
+    if(!projects.every(function(p){return p&&typeof p==="object"&&p.id&&Array.isArray(p.cues||[])}))throw new Error("invalid projects");
+    var ok=confirm("バックアップから"+projects.length+"曲を復元します。現在の曲ファイル一覧はバックアップ内容に置き換わります。よろしいですか？");
+    if(!ok){setStatus("復元をキャンセルしました");return}
+    pauseAll();writeProjectIndex(projects);currentProject=null;currentFile=null;cues=[];clearMediaElements();resetWave();renderProjectList();markSaved();showScreen("Library");
+    setStatus(projects.length+"曲をバックアップから復元しました");
+    alert("復元しました。音源・動画が表示されない曲は、設定から元のファイルを再選択してください。");
+  }catch(e){console.error(e);alert("このファイルはQ TIMERのバックアップとして読み込めませんでした")}
+}
 function snapshot(){return {id:currentProject&&currentProject.id?currentProject.id:uid(),name:(songName.value||"").trim()||"名称未設定",mediaName:currentFile?currentFile.name:(currentProject&&currentProject.mediaName)||"",mediaType:mediaType,zeroOffsetMs:zeroOffsetMs,countEnabled:countEnabled,countMode:countMode,bpm:parseFloat(bpmEl.value)||120,beatsPerBar:parseInt(beatsPerBarEl.value,10)||4,cues:cues.map(function(c){return {time:c.time,name:c.name||"",memo:c.memo||""}}),updatedAt:Date.now()}}
 
 function openDb(){return new Promise(function(resolve,reject){var req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=function(){var db=req.result;if(!db.objectStoreNames.contains(DB_STORE))db.createObjectStore(DB_STORE)};req.onsuccess=function(){resolve(req.result)};req.onerror=function(){reject(req.error)}})}
@@ -182,6 +229,8 @@ $("navLibrary").onclick=function(){showScreen("Library")};$("navSettings").oncli
 
 function newProject(){pauseAll();currentProject={id:uid(),name:"",mediaName:"",mediaType:"none",zeroOffsetMs:0,countEnabled:false,countMode:"dance",bpm:120,beatsPerBar:4,cues:[]};currentFile=null;mediaType="none";mediaDuration=0;zeroOffsetMs=0;countEnabled=false;countMode="dance";cues=[];songName.value="";bpmEl.value="120";beatsPerBarEl.value="4";clearMediaElements();resetWave();markDirty("新しい曲の設定を始めます");showScreen("Settings")}
 $("newProject").onclick=newProject;
+$("exportBackup").onclick=exportBackup;
+$("importBackup").addEventListener("change",function(){var f=this.files&&this.files[0];if(f)importBackupFile(f);this.value=""});
 
 function clearUrls(){objectURLs.forEach(function(u){try{URL.revokeObjectURL(u)}catch(e){}});objectURLs=[]}
 function clearMediaElements(){clearUrls();[settingsAudio,settingsVideo,editorAudio,editorVideo].forEach(function(m){try{m.pause()}catch(e){};m.removeAttribute("src");m.load();m.classList.add("hidden")});$("settingsMediaName").textContent="音源・動画なし";$("editorMediaName").textContent="メディアなし"}
