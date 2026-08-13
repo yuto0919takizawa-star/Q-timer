@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d10">
-<title>Q TIMER v14</title>
+<title>Q TIMER Show File</title>
 <link rel="apple-touch-icon" href="icon.png">
 <style>
 :root{--bg:#0b0d10;--panel:#171b21;--panel2:#11161c;--line:#2b3139;--text:#fff;--muted:#8f98a6;--accent:#ffd21c;--ok:#34c759;--danger:#ff453a}
@@ -74,7 +74,7 @@ audio{width:100%;margin-top:9px;height:38px}video{width:100%;margin-top:9px;max-
   </div>
 
   <div class="nav">
-    <button id="navLibrary" class="active" type="button">FILE</button>
+    <button id="navLibrary" class="active" type="button">SHOW FILE</button>
     <button id="navSettings" type="button">SETTING</button>
     <button id="navEditor" type="button">Q LIST</button>
     <button id="navLive" type="button">SHOW</button>
@@ -82,23 +82,26 @@ audio{width:100%;margin-top:9px;height:38px}video{width:100%;margin-top:9px;max-
 
   <section id="screenLibrary" class="screen active">
     <div class="card">
-      <div class="cardTitle">曲ファイル</div>
-      <button id="newProject" class="primary bigAction" type="button">＋ 新しい曲を作る</button>
-      <div class="sectionHint">曲名・設定・Qリストを端末内に保存します。音源・動画も端末内DBへ保存を試みますが、大きな動画では容量制限により再選択が必要になる場合があります。</div>
+      <div class="cardTitle">Show File</div>
+      <div class="row"><button id="newShow" class="primary bigAction" type="button">＋ New Show</button></div>
+      <div class="sectionHint">公演ごとにShow Fileを作り、その中にM1 / M2 / M3…の曲を保存します。</div>
     </div>
     <div class="card">
-      <div class="cardTitle">保存した曲</div>
-      <div id="projectList"></div>
-    </div>
-    <div class="card">
-      <div class="cardTitle">バックアップ</div>
-      <div class="backupGrid">
-        <button id="exportBackup" class="secondary" type="button">バックアップを保存</button>
-        <label class="fileBtn">バックアップを復元<input id="importBackup" type="file" accept="application/json,.json,.qtimer-backup"></label>
+      <div class="cardTitle" id="libraryTitle">Show Files</div>
+      <div id="showList"></div>
+      <div id="songArea" class="hidden">
+        <div class="row" style="margin-bottom:10px"><button id="backShows" class="secondary" type="button">← Show Files</button><button id="newProject" class="primary grow" type="button">＋ 曲を追加</button></div>
+        <div id="projectList"></div>
       </div>
-      <div class="backupNote">保存した曲・設定・Qリスト・Fadeを1つのバックアップファイルとしてiPhoneの「ファイル」に保存できます。音源・動画本体はバックアップに含みません。</div>
     </div>
-
+    <div class="card">
+      <div class="cardTitle">Show File Backup</div>
+      <div class="backupGrid">
+        <button id="exportBackup" class="secondary" type="button">Export Show File</button>
+        <label class="fileBtn">Import Show File<input id="importBackup" type="file" accept="application/json,.json,.qtimer-show"></label>
+      </div>
+      <div class="backupNote">選択中のShow Fileを曲順・Q List・Fade・Memo・設定ごと1ファイルで保存／別端末へImportできます。音源・動画本体は含みません。</div>
+    </div>
   </section>
 
   <section id="screenSettings" class="screen">
@@ -208,6 +211,7 @@ audio{width:100%;margin-top:9px;height:38px}video{width:100%;margin-top:9px;max-
 var STORAGE_KEY="qtimer.projects.v11";
 var DB_NAME="qtimer-media-v11", DB_STORE="media";
 var currentProject=null, currentFile=null, objectURLs=[];
+var currentShowId=null;
 var mediaType="none", mediaDuration=0, zeroOffsetMs=0, countEnabled=false, countMode="dance", tapTimes=[];
 var cues=[], newestFirst=true, copyNewestFirst=false, stopOnCue=false, loopRangeIndex=null, cueTouchLock=false;
 var running=false, startedAt=0, carried=0, timerLoop=null, liveLastPaint=0;
@@ -225,43 +229,16 @@ function markSaved(){saveState.textContent="保存済み";saveState.style.backgr
 function setStatus(msg){statusEl.textContent=msg}
 function loadProjectIndex(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]")||[]}catch(e){return []}}
 function writeProjectIndex(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr))}
+function loadShows(){try{return JSON.parse(localStorage.getItem("qtimer_shows_v1")||"[]")||[]}catch(e){return []}}
+function writeShows(arr){localStorage.setItem("qtimer_shows_v1",JSON.stringify(arr))}
+function ensureLegacyShow(){var shows=loadShows(),projects=loadProjectIndex();if(!shows.length&&projects.length){var id="s_legacy";shows=[{id:id,name:"Imported Songs",createdAt:Date.now()}];projects.forEach(function(p){if(!p.showId)p.showId=id});writeShows(shows);writeProjectIndex(projects)}}
 function safeBackupDate(){var d=new Date(),pad=function(n){return String(n).padStart(2,"0")};return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"_"+pad(d.getHours())+pad(d.getMinutes())}
-async function exportBackup(){
-  try{
-    if(currentProject&&saveState.textContent==="未保存"){await saveCurrentProject()}
-    var projects=loadProjectIndex();
-    var payload={app:"Q TIMER",format:"qtimer-backup",version:1,exportedAt:new Date().toISOString(),projects:projects};
-    var text=JSON.stringify(payload,null,2),name="Q_TIMER_backup_"+safeBackupDate()+".json";
-    var file=new File([text],name,{type:"application/json"});
-    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:"Q TIMER バックアップ"});
-      setStatus("バックアップを共有しました。「ファイルに保存」を選べます");
-    }else{
-      var blob=new Blob([text],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");
-      a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},3000);
-      setStatus("バックアップを書き出しました");
-    }
-  }catch(e){
-    if(e&&e.name==="AbortError"){setStatus("バックアップ保存をキャンセルしました");return}
-    console.error(e);alert("バックアップを保存できませんでした");
-  }
-}
-async function importBackupFile(file){
-  if(!file)return;
-  try{
-    var text=await file.text(),data=JSON.parse(text),projects;
-    if(Array.isArray(data))projects=data;
-    else if(data&&data.format==="qtimer-backup"&&Array.isArray(data.projects))projects=data.projects;
-    else throw new Error("invalid backup");
-    if(!projects.every(function(p){return p&&typeof p==="object"&&p.id&&Array.isArray(p.cues||[])}))throw new Error("invalid projects");
-    var ok=confirm("バックアップから"+projects.length+"曲を復元します。現在の曲ファイル一覧はバックアップ内容に置き換わります。よろしいですか？");
-    if(!ok){setStatus("復元をキャンセルしました");return}
-    pauseAll();writeProjectIndex(projects);currentProject=null;currentFile=null;cues=[];clearMediaElements();resetWave();renderProjectList();markSaved();showScreen("Library");
-    setStatus(projects.length+"曲をバックアップから復元しました");
-    alert("復元しました。音源・動画が表示されない曲は、設定から元のファイルを再選択してください。");
-  }catch(e){console.error(e);alert("このファイルはQ TIMERのバックアップとして読み込めませんでした")}
-}
-function snapshot(){return {id:currentProject&&currentProject.id?currentProject.id:uid(),name:(songName.value||"").trim()||"名称未設定",mediaName:currentFile?currentFile.name:(currentProject&&currentProject.mediaName)||"",mediaType:mediaType,zeroOffsetMs:zeroOffsetMs,countEnabled:countEnabled,countMode:countMode,bpm:parseFloat(bpmEl.value)||120,beatsPerBar:parseInt(beatsPerBarEl.value,10)||4,cues:cues.map(function(c){return {time:c.time,name:c.name||"",memo:c.memo||"",fade:c.fade==null?"0":String(c.fade)}}),updatedAt:Date.now()}}
+function newShow(){var name=prompt("Show File名を入力してください\n例：9/6 ダンス");if(!name||!name.trim())return;var sh={id:"s_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7),name:name.trim(),createdAt:Date.now(),updatedAt:Date.now()};var arr=loadShows();arr.unshift(sh);writeShows(arr);currentShowId=sh.id;renderProjectList();setStatus("Show File「"+sh.name+"」を作成しました")}
+function openShow(id){currentShowId=id;renderProjectList()}
+function deleteShow(id){var sh=loadShows().find(function(x){return x.id===id});if(!confirm("Show File「"+(sh?sh.name:"")+"」と中の曲を削除しますか？"))return;var ps=loadProjectIndex(),del=ps.filter(function(p){return p.showId===id});writeProjectIndex(ps.filter(function(p){return p.showId!==id}));del.forEach(function(p){dbDeleteMedia(p.id)});writeShows(loadShows().filter(function(x){return x.id!==id}));if(currentShowId===id)currentShowId=null;renderProjectList()}
+async function exportBackup(){try{if(!currentShowId){alert("ExportするShow Fileを開いてください");return}if(currentProject&&saveState.textContent==="未保存")await saveCurrentProject();var sh=loadShows().find(function(x){return x.id===currentShowId});if(!sh)throw new Error("show missing");var projects=loadProjectIndex().filter(function(p){return p.showId===currentShowId});var payload={app:"Q TIMER",format:"qtimer-show",version:1,exportedAt:new Date().toISOString(),show:{id:sh.id,name:sh.name},projects:projects};var text=JSON.stringify(payload,null,2),safe=(sh.name||"Show").replace(/[\/:*?"<>|]/g,"_");var name="Q_TIMER_"+safe+"_"+safeBackupDate()+".qtimer-show";var file=new File([text],name,{type:"application/json"});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Q TIMER Show File"});setStatus("Show Fileを共有しました")}else{var blob=new Blob([text],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},3000);setStatus("Show Fileを書き出しました")}}catch(e){if(e&&e.name==="AbortError")return;console.error(e);alert("Show FileをExportできませんでした")}}
+async function importBackupFile(file){if(!file)return;try{var data=JSON.parse(await file.text());if(!data||data.format!=="qtimer-show"||!data.show||!Array.isArray(data.projects))throw new Error("invalid");var shows=loadShows(),same=shows.find(function(x){return x.name===data.show.name}),newId;if(same){var overwrite=confirm("同じ名前のShow Fileがあります。\nOK：上書き\nキャンセル：コピーとして追加");if(overwrite){newId=same.id;writeProjectIndex(loadProjectIndex().filter(function(p){return p.showId!==newId}))}else newId="s_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7)}else newId="s_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7);if(!same||newId!==same.id)shows.unshift({id:newId,name:data.show.name+(same?" copy":""),createdAt:Date.now(),updatedAt:Date.now()});writeShows(shows);var existing=loadProjectIndex();data.projects.forEach(function(p,i){var q=JSON.parse(JSON.stringify(p));q.id=uid();q.showId=newId;q.order=(typeof q.order==="number"?q.order:i);q.updatedAt=Date.now();existing.push(q)});writeProjectIndex(existing);currentShowId=newId;currentProject=null;renderProjectList();markSaved();setStatus("Show FileをImportしました");alert("Importしました。音源・動画は各端末で再選択してください。") }catch(e){console.error(e);alert("このファイルはQ TIMER Show Fileとして読み込めませんでした")}}
+function snapshot(){return {id:currentProject&&currentProject.id?currentProject.id:uid(),showId:currentShowId,order:currentProject&&typeof currentProject.order==="number"?currentProject.order:loadProjectIndex().filter(function(p){return p.showId===currentShowId}).length,name:(songName.value||"").trim()||"名称未設定",mediaName:currentFile?currentFile.name:(currentProject&&currentProject.mediaName)||"",mediaType:mediaType,zeroOffsetMs:zeroOffsetMs,countEnabled:countEnabled,countMode:countMode,bpm:parseFloat(bpmEl.value)||120,beatsPerBar:parseInt(beatsPerBarEl.value,10)||4,cues:cues.map(function(c){return {time:c.time,name:c.name||"",memo:c.memo||"",fade:c.fade==null?"0":String(c.fade)}}),updatedAt:Date.now()}}
 
 function openDb(){return new Promise(function(resolve,reject){var req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=function(){var db=req.result;if(!db.objectStoreNames.contains(DB_STORE))db.createObjectStore(DB_STORE)};req.onsuccess=function(){resolve(req.result)};req.onerror=function(){reject(req.error)}})}
 async function dbPutMedia(id,file){if(!file)return;var db=await openDb();return new Promise(function(resolve,reject){var tx=db.transaction(DB_STORE,"readwrite");tx.objectStore(DB_STORE).put(file,id);tx.oncomplete=function(){db.close();resolve()};tx.onerror=function(){db.close();reject(tx.error)}})}
@@ -271,8 +248,8 @@ async function dbDeleteMedia(id){try{var db=await openDb();await new Promise(fun
 function showScreen(name){["Library","Settings","Editor","Live"].forEach(function(n){$("screen"+n).classList.toggle("active",n===name);$("nav"+n).classList.toggle("active",n===name)});if(name==="Library")renderProjectList();if(name==="Settings")refreshSettingsUI();if(name==="Editor")refreshEditorUI();if(name==="Live")renderPerformance()}
 $("navLibrary").onclick=function(){showScreen("Library")};$("navSettings").onclick=function(){if(!currentProject){newProject()}else showScreen("Settings")};$("navEditor").onclick=function(){if(!currentProject){newProject()}else showScreen("Editor")};$("navLive").onclick=function(){ensureLiveProject();showScreen("Live")};
 
-function newProject(){pauseAll();currentProject={id:uid(),name:"",mediaName:"",mediaType:"none",zeroOffsetMs:0,countEnabled:false,countMode:"dance",bpm:120,beatsPerBar:4,cues:[]};currentFile=null;mediaType="none";mediaDuration=0;zeroOffsetMs=0;countEnabled=false;countMode="dance";cues=[];songName.value="";bpmEl.value="120";beatsPerBarEl.value="4";clearMediaElements();resetWave();markDirty("新しい曲の設定を始めます");showScreen("Settings")}
-$("newProject").onclick=newProject;
+function newProject(){if(!currentShowId){alert("先にShow Fileを作成または開いてください");return}pauseAll();currentProject={id:uid(),showId:currentShowId,order:loadProjectIndex().filter(function(p){return p.showId===currentShowId}).length,name:"",mediaName:"",mediaType:"none",zeroOffsetMs:0,countEnabled:false,countMode:"dance",bpm:120,beatsPerBar:4,cues:[]};currentFile=null;mediaType="none";mediaDuration=0;zeroOffsetMs=0;countEnabled=false;countMode="dance";cues=[];songName.value="";bpmEl.value="120";beatsPerBarEl.value="4";clearMediaElements();resetWave();markDirty("新しい曲の設定を始めます");showScreen("Settings")}
+$("newShow").onclick=newShow;$("backShows").onclick=function(){currentShowId=null;renderProjectList()};$("newProject").onclick=newProject;
 $("exportBackup").onclick=exportBackup;
 $("importBackup").addEventListener("change",function(){var f=this.files&&this.files[0];if(f)importBackupFile(f);this.value=""});
 
@@ -319,7 +296,7 @@ async function saveCurrentProject(){if(!currentProject)currentProject={id:uid()}
 $("saveSettings").onclick=saveCurrentProject;$("saveProject").onclick=saveCurrentProject;$("goEditor").onclick=async function(){if(!(songName.value||"").trim()){songName.value="名称未設定"}await saveCurrentProject();showScreen("Editor")};$("backSettings").onclick=function(){showScreen("Settings")};
 async function openProject(id,go){var arr=loadProjectIndex(),p=arr.find(function(x){return x.id===id});if(!p)return;pauseAll();currentProject=p;songName.value=p.name||"";mediaType=p.mediaType||"none";zeroOffsetMs=p.zeroOffsetMs||0;countEnabled=!!p.countEnabled;countMode=p.countMode||"dance";bpmEl.value=p.bpm||120;beatsPerBarEl.value=p.beatsPerBar||4;cues=Array.isArray(p.cues)?p.cues.map(function(c){return {time:c.time||0,name:c.name||"",memo:c.memo||"",fade:c.fade==null?"0":String(c.fade)}}):[];currentFile=null;clearMediaElements();resetWave();try{var f=await dbGetMedia(p.id);if(f)await setMedia(f,true);else{$("settingsMediaName").textContent=p.mediaName?"再選択が必要："+p.mediaName:"音源・動画なし";$("editorMediaName").textContent=p.mediaName?"再選択が必要："+p.mediaName:"メディアなし";mediaType=p.mediaType||"none"}}catch(e){console.error(e)}markSaved();refreshSettingsUI();refreshEditorUI();setStatus("「"+(p.name||"名称未設定")+"」を開きました");showScreen(go||"Editor")}
 async function deleteProject(id){if(!confirm("この曲ファイルを削除しますか？"))return;var arr=loadProjectIndex().filter(function(x){return x.id!==id});writeProjectIndex(arr);await dbDeleteMedia(id);if(currentProject&&currentProject.id===id){currentProject=null;currentFile=null;cues=[];clearMediaElements()}renderProjectList();setStatus("曲ファイルを削除しました")}
-function renderProjectList(){var arr=loadProjectIndex(),box=$("projectList");if(!arr.length){box.innerHTML='<div class="libraryEmpty">保存した曲はまだありません</div>';return}box.innerHTML=arr.sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)}).map(function(p){var meta=(p.countEnabled?(p.countMode==="bars"?"小節":"8カウント")+" / BPM "+(p.bpm||120):"カウントOFF")+" ・ Q"+(p.cues?p.cues.length:0);return '<div class="project"><div class="projectName">'+esc(p.name||"名称未設定")+'</div><div class="projectMeta">'+esc(p.mediaName||"メディアなし")+'<br>'+meta+'</div><div class="projectBtns"><button data-open="'+p.id+'">Qリストを開く</button><button data-set="'+p.id+'">設定を開く</button><button class="danger" data-del="'+p.id+'">削除</button></div></div>'}).join("");Array.prototype.forEach.call(box.querySelectorAll("[data-open]"),function(b){b.onclick=function(){openProject(this.getAttribute("data-open"),"Editor")}});Array.prototype.forEach.call(box.querySelectorAll("[data-set]"),function(b){b.onclick=function(){openProject(this.getAttribute("data-set"),"Settings")}});Array.prototype.forEach.call(box.querySelectorAll("[data-del]"),function(b){b.onclick=function(){deleteProject(this.getAttribute("data-del"))}})}
+function renderProjectList(){ensureLegacyShow();var shows=loadShows(),showBox=$("showList"),songArea=$("songArea"),box=$("projectList");if(!currentShowId){$("libraryTitle").textContent="Show Files";songArea.classList.add("hidden");showBox.classList.remove("hidden");if(!shows.length){showBox.innerHTML='<div class="libraryEmpty">Show Fileはまだありません</div>';return}showBox.innerHTML=shows.map(function(sh){var n=loadProjectIndex().filter(function(p){return p.showId===sh.id}).length;return '<div class="project"><div class="projectName">'+esc(sh.name)+'</div><div class="projectMeta">'+n+' 曲</div><div class="projectBtns"><button data-show="'+sh.id+'">開く</button><button class="danger" data-showdel="'+sh.id+'">削除</button></div></div>'}).join("");Array.prototype.forEach.call(showBox.querySelectorAll("[data-show]"),function(b){b.onclick=function(){openShow(this.getAttribute("data-show"))}});Array.prototype.forEach.call(showBox.querySelectorAll("[data-showdel]"),function(b){b.onclick=function(){deleteShow(this.getAttribute("data-showdel"))}});return}var sh=shows.find(function(x){return x.id===currentShowId});if(!sh){currentShowId=null;renderProjectList();return}$("libraryTitle").textContent=sh.name;showBox.classList.add("hidden");songArea.classList.remove("hidden");var arr=loadProjectIndex().filter(function(p){return p.showId===currentShowId}).sort(function(a,b){return (a.order||0)-(b.order||0)});if(!arr.length){box.innerHTML='<div class="libraryEmpty">このShow Fileに曲はまだありません</div>';return}box.innerHTML=arr.map(function(p,i){var meta=(p.countEnabled?(p.countMode==="bars"?"小節":"8カウント")+" / BPM "+(p.bpm||120):"カウントOFF")+" ・ Q"+(p.cues?p.cues.length:0);return '<div class="project"><div class="projectName">M'+(i+1)+'　'+esc(p.name||"名称未設定")+'</div><div class="projectMeta">'+esc(p.mediaName||"メディアなし")+'<br>'+meta+'</div><div class="projectBtns"><button data-open="'+p.id+'">Q LIST</button><button data-set="'+p.id+'">SETTING</button><button class="danger" data-del="'+p.id+'">削除</button></div></div>'}).join("");Array.prototype.forEach.call(box.querySelectorAll("[data-open]"),function(b){b.onclick=function(){openProject(this.getAttribute("data-open"),"Editor")}});Array.prototype.forEach.call(box.querySelectorAll("[data-set]"),function(b){b.onclick=function(){openProject(this.getAttribute("data-set"),"Settings")}});Array.prototype.forEach.call(box.querySelectorAll("[data-del]"),function(b){b.onclick=function(){deleteProject(this.getAttribute("data-del"))}})}
 function esc(s){return String(s||"").replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]})}
 
 async function playFromCurrent(){var m=activeEditorMedia();if(m){try{await m.play();running=true;$("start").textContent="Ⅱ PAUSE";setStatus("計測中");startLoop()}catch(e){setStatus("このファイルはSafariで再生できません")}}else{startedAt=Date.now();running=true;$("start").textContent="Ⅱ PAUSE";setStatus("計測中");startLoop()}}
