@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0d10">
+<title>Q TIMER v14</title>
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+:root{--bg:#0b0d10;--panel:#171b21;--panel2:#11161c;--line:#2b3139;--text:#fff;--muted:#8f98a6;--accent:#ffd21c;--ok:#34c759;--danger:#ff453a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+body{min-height:100vh}
+button,input,select{font:inherit}
+button{appearance:none;-webkit-appearance:none;border:0;border-radius:14px;background:var(--panel);color:var(--text);font-weight:850;padding:13px 15px}
+button:disabled{opacity:.45}
+input,select{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:#fff;padding:12px 13px;outline:none}
+input:focus,select:focus{border-color:#697482}
+.app{max-width:760px;margin:auto;min-height:100vh;padding:calc(16px + env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom))}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}
+h1{font-size:21px;margin:0 0 4px;font-weight:950;letter-spacing:.04em}.sub{font-size:12px;color:var(--muted)}
+.statusPill{font-size:11px;color:#111;background:var(--accent);border-radius:999px;padding:6px 9px;font-weight:900;white-space:nowrap}
+.nav{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;margin-bottom:14px}.nav button{font-size:12px;padding:10px 7px;border:1px solid var(--line);background:var(--panel2)}.nav button.active{background:var(--accent);color:#111;border-color:var(--accent)}
+.screen{display:none}.screen.active{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:13px;margin-bottom:12px}
+.cardTitle{font-size:14px;font-weight:900;margin-bottom:10px}.sectionHint{font-size:11px;color:var(--muted);line-height:1.55;margin-top:7px}
+.primary{background:var(--accent);color:#111}.secondary{background:#232a33}.danger{background:#341817;color:#ffb4ae}.ok{background:#19331f;color:#9ee9ad}
+.row{display:flex;gap:8px;align-items:center}.row>*{min-width:0}.grow{flex:1}.stack{display:grid;gap:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+label.field{display:block}.fieldName{display:block;font-size:11px;color:var(--muted);margin:0 0 5px 2px}
+.bigAction{width:100%;font-size:18px;padding:16px}
+.fileBtn{display:inline-flex;justify-content:center;align-items:center;background:#232a33;border-radius:13px;padding:12px 13px;font-weight:850;font-size:13px;white-space:nowrap}input[type=file]{display:none}
+.mediaName{font-size:13px;color:#dbe1e8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+audio{width:100%;margin-top:9px;height:38px}video{width:100%;margin-top:9px;max-height:38vh;aspect-ratio:16/9;object-fit:contain;border-radius:12px;background:#000}.hidden{display:none!important}
+.switchRow{display:flex;gap:8px}.switchRow button{flex:1;font-size:13px}.switchRow button.active{background:var(--accent);color:#111}
+.countOnly.hidden{display:none!important}
+.waveWrap{margin-top:10px;border-radius:14px;background:#0d1116;border:1px solid var(--line);padding:9px;overflow:hidden}
+.waveTitle{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}.waveTitle .value{font-variant-numeric:tabular-nums;font-weight:900}
+.waveFrame{position:relative}.waveScroller{overflow-x:auto;overflow-y:hidden;height:108px;touch-action:pan-x;background:#090c10;border-radius:10px;scrollbar-width:none}.waveScroller::-webkit-scrollbar{display:none}.waveInner{height:108px;position:relative;min-width:100%}.waveCanvas{display:block;height:108px}.zeroLine{pointer-events:none;position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--accent);box-shadow:0 0 0 1px rgba(255,210,28,.18)}.zeroBadge{pointer-events:none;position:absolute;left:50%;top:5px;transform:translateX(-50%);font-size:10px;font-weight:950;background:var(--accent);color:#111;border-radius:999px;padding:3px 6px}
+.waveControls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.waveControls button{font-size:12px;padding:10px}.waveFallback{font-size:11px;color:var(--muted);padding:20px 8px;text-align:center;line-height:1.5}
+.libraryEmpty{text-align:center;color:var(--muted);padding:30px 8px}.project{border-top:1px solid var(--line);padding:12px 0}.project:first-child{border-top:0;padding-top:0}.projectName{font-weight:900}.projectMeta{font-size:11px;color:var(--muted);margin-top:3px}.projectBtns{display:grid;grid-template-columns:1fr 1fr 64px;gap:7px;margin-top:8px}.projectBtns button{font-size:12px;padding:10px 8px}
+.saveBar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.saveBar button{font-size:13px}
+.timer{text-align:center;font-variant-numeric:tabular-nums;font-size:58px;font-weight:900;letter-spacing:.02em;margin:20px 0 16px}.controls{display:flex;gap:9px}.controls #start{flex:1}.controls #reset{width:104px}
+.mode{display:flex;gap:8px;margin:9px 0}.mode button{flex:1;font-size:12px;padding:10px}.mode button.active{background:var(--accent);color:#111}
+#cue{width:100%;min-height:56px;height:56px;margin-top:3px;border-radius:18px;background:var(--accent);color:#111;font-size:32px;font-weight:950;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .06s ease,filter .06s ease,box-shadow .06s ease}#cue:active{transform:scale(.985)}#cue.flash{filter:brightness(1.45);box-shadow:0 0 0 4px rgba(255,210,28,.35),0 0 38px rgba(255,210,28,.95);transform:scale(.99)}
+.note{text-align:center;color:var(--muted);font-size:11px;margin:9px 0 15px}.tools{display:flex;gap:8px;margin-bottom:8px}.tools button{flex:1;font-size:12px;padding:10px}.listOptions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.listOptions button{font-size:11px;padding:9px 7px;border-radius:11px;background:var(--panel2);border:1px solid var(--line)}.listOptions button.active{background:#232a33;border-color:#57616e}
+.item{display:grid;grid-template-columns:42px 74px 1fr 66px 30px;gap:6px;align-items:center;border-top:1px solid var(--line);padding:10px 2px}.item.latest{background:rgba(255,210,28,.045)}.qn{font-weight:900}.seekBtn,.nameBtn,.memoBtn,.del,.loopBtn{background:transparent}.seekBtn{padding:5px 0;text-align:left;color:#fff;font-variant-numeric:tabular-nums;font-size:13px;text-decoration:underline;text-decoration-color:#56606d;text-underline-offset:4px}.nameBtn,.memoBtn{padding:4px 0;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.nameBtn{font-size:13px}.memoBtn{font-size:11px;color:#bfc7d1;grid-column:3 / 5}.del{color:#838c98;padding:6px}.loopBtn{background:#232a33;color:#fff;padding:7px 6px;border-radius:9px;font-size:10px;white-space:nowrap}.loopBtn.active{background:var(--accent);color:#111}.segment{font-size:11px;color:#c8ced6;grid-column:2 / 5}.empty{text-align:center;color:#717b87;padding:28px 0}
+.editInput{width:100%;background:transparent;color:white;border:0;border-bottom:1px solid #666;border-radius:0;outline:none;font-size:14px;padding:4px 0}
+.fadeBtn{grid-column:2;grid-row:2;background:transparent;color:#d9dee5;padding:2px 0;text-align:left;font-size:11px;white-space:nowrap}.fadeBtn::before{content:"Fade ";color:#8f98a6}.memoBtn{grid-row:2;grid-column:3 / 5}.segment{grid-row:3}
+.liveHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.liveSong{font-size:20px;font-weight:950;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.liveTime{font-variant-numeric:tabular-nums;font-size:18px;font-weight:900;color:#dbe1e8}.liveGrid{display:grid;gap:10px}.liveCard{border:1px solid var(--line);border-radius:18px;padding:14px;background:#101419}.liveCard.now{border-color:#57616e}.liveCard.next{border-color:var(--accent);box-shadow:inset 0 0 0 1px rgba(255,210,28,.18)}.liveLabel{font-size:11px;font-weight:950;letter-spacing:.12em;color:var(--muted);margin-bottom:7px}.liveCard.next .liveLabel{color:var(--accent)}.liveQrow{display:flex;align-items:baseline;gap:10px}.liveQ{font-size:30px;font-weight:950;min-width:62px}.liveName{font-size:22px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.liveMeta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#c4cbd4}.liveMemo{font-size:15px;font-weight:700;color:#e4e8ed;margin-top:10px;min-height:20px}.liveCountdown{font-size:44px;font-weight:950;font-variant-numeric:tabular-nums;text-align:center;margin:8px 0 2px}.liveCountdownLabel{text-align:center;font-size:11px;color:var(--muted)}.liveControls{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:10px}.liveControls button{min-height:50px}.liveEmpty{color:var(--muted);font-size:13px;padding:18px;text-align:center}
+
+.editorMediaHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}.editorMediaHead .name{font-size:12px;color:#dbe1e8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.miniBtn{font-size:11px;padding:8px 9px}
+@media(max-width:430px){.timer{font-size:50px}.item{grid-template-columns:38px 69px 1fr 58px 28px}.grid3{grid-template-columns:1fr 1fr}.grid3>*:last-child{grid-column:1 / -1}}
+
+.liveSongSelect{display:grid;grid-template-columns:54px 1fr 54px;gap:8px;align-items:center;margin-bottom:12px}.liveSongSelect button{height:46px;font-size:24px;font-weight:900}.liveSongCenter{text-align:center;min-width:0}.liveSongIndex{font-size:11px;color:var(--muted);margin-top:3px}.backupGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.backupGrid button,.backupGrid .fileBtn{width:100%;font-size:13px;padding:12px 10px}.backupNote{font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px}
+
+/* SHOW status colors */
+.showCard.nowCard{border-color:#ff3b30 !important;}
+.showCard.nextCard{border-color:#34c759 !important;}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div><h1>Q TIMER</h1><div class="sub" id="status">曲を新規作成するか開いてください</div></div>
+    <div class="statusPill" id="saveState">未保存</div>
+  </div>
+
+  <div class="nav">
+    <button id="navLibrary" class="active" type="button">FILE</button>
+    <button id="navSettings" type="button">SETTING</button>
+    <button id="navEditor" type="button">Q LIST</button>
+    <button id="navLive" type="button">SHOW</button>
+  </div>
+
+  <section id="screenLibrary" class="screen active">
+    <div class="card">
+      <div class="cardTitle">曲ファイル</div>
+      <button id="newProject" class="primary bigAction" type="button">＋ 新しい曲を作る</button>
+      <div class="sectionHint">曲名・設定・Qリストを端末内に保存します。音源・動画も端末内DBへ保存を試みますが、大きな動画では容量制限により再選択が必要になる場合があります。</div>
+    </div>
+    <div class="card">
+      <div class="cardTitle">保存した曲</div>
+      <div id="projectList"></div>
+    </div>
+    <div class="card">
+      <div class="cardTitle">バックアップ</div>
+      <div class="backupGrid">
+        <button id="exportBackup" class="secondary" type="button">バックアップを保存</button>
+        <label class="fileBtn">バックアップを復元<input id="importBackup" type="file" accept="application/json,.json,.qtimer-backup"></label>
+      </div>
+      <div class="backupNote">保存した曲・設定・Qリスト・Fadeを1つのバックアップファイルとしてiPhoneの「ファイル」に保存できます。音源・動画本体はバックアップに含みません。</div>
+    </div>
+
+  </section>
+
+  <section id="screenSettings" class="screen">
+    <div class="card">
+      <div class="cardTitle">1. 曲の基本情報</div>
+      <label class="field"><span class="fieldName">曲名</span><input id="songName" type="text" placeholder="例：Opening"></label>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">2. 音源・動画</div>
+      <div class="row">
+        <div class="mediaName grow" id="settingsMediaName">音源・動画なし</div>
+        <label class="fileBtn">ファイルを選ぶ<input id="settingsMediaFile" type="file" accept="audio/*,video/*,.mp3,.wav,.m4a,.aac,.mp4,.mov,.m4v,.webm"></label>
+      </div>
+      <audio id="settingsAudio" controls preload="metadata" class="hidden"></audio>
+      <video id="settingsVideo" controls playsinline preload="metadata" class="hidden"></video>
+      <div id="waveArea" class="waveWrap hidden">
+        <div class="waveTitle"><span class="sub">0:00位置を波形で合わせる</span><span class="value" id="zeroMediaTime">メディア 00:00.000</span></div>
+        <div class="waveFrame">
+          <div id="waveScroller" class="waveScroller">
+            <div id="waveInner" class="waveInner">
+              <canvas id="waveCanvas" class="waveCanvas" width="1200" height="108"></canvas>
+            </div>
+          </div>
+          <div class="zeroLine"></div><div class="zeroBadge">0:00</div>
+        </div>
+        <div id="waveFallback" class="waveFallback hidden">このメディアでは波形を作れませんでした。動画・音声の再生バーで位置を合わせて「現在位置を0:00に設定」を使えます。</div>
+        <div class="waveControls">
+          <button id="zeroToStart" type="button">先頭を0:00</button>
+          <button id="zeroToCurrent" class="primary" type="button">現在位置を0:00に設定</button>
+        </div>
+        <div class="sectionHint">波形を左右に動かすと、中央の黄色線に来た位置へメディアも追従します。音の立ち上がりを中央線に合わせてから決定できます。</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="cardTitle">3. カウント</div>
+      <div class="switchRow" id="countSwitch"><button id="countOff" class="active" type="button">OFF</button><button id="countOn" type="button">ON</button></div>
+      <div id="countSettings" class="countOnly hidden" style="margin-top:10px">
+        <div class="grid2">
+          <label class="field"><span class="fieldName">BPM</span><input id="bpm" type="number" inputmode="decimal" min="20" max="300" step="0.1" value="120"></label>
+          <div><span class="fieldName">テンポ</span><button id="tap" class="secondary" style="width:100%" type="button">TAP TEMPO</button></div>
+        </div>
+        <button id="analyzeBpm" class="secondary" style="width:100%;margin-top:8px" type="button">🎧 BPM自動解析</button>
+        <div class="switchRow" style="margin-top:8px"><button id="countDance" class="active" type="button">8カウント</button><button id="countBars" type="button">小節</button></div>
+        <div id="barField" class="hidden" style="margin-top:8px"><label class="field"><span class="fieldName">1小節の拍数</span><input id="beatsPerBar" type="number" inputmode="numeric" min="1" max="12" step="1" value="4"></label></div>
+      </div>
+    </div>
+
+    <div class="saveBar">
+      <button id="saveSettings" class="secondary" type="button">設定を保存</button>
+      <button id="goEditor" class="primary" type="button">Qリスト作成へ →</button>
+    </div>
+  </section>
+
+  <section id="screenEditor" class="screen">
+    <div class="card">
+      <div class="editorMediaHead"><div class="name" id="editorSongTitle">曲名未設定</div><button id="backSettings" class="miniBtn" type="button">設定を変更</button></div>
+      <div class="editorMediaHead"><div class="name" id="editorMediaName">メディアなし</div><div class="sub" id="editorZeroInfo">0:00 = 先頭</div></div>
+      <audio id="editorAudio" controls preload="metadata" class="hidden"></audio>
+      <video id="editorVideo" controls playsinline preload="metadata" class="hidden"></video>
+    </div>
+
+    <div id="timer" class="timer">00:00</div>
+    <div class="controls"><button id="start" class="primary" type="button">▶ START + Q1</button><button id="reset" type="button">RESET</button></div>
+    <div class="mode"><button id="modeContinue" class="active" type="button">Qで止めない</button><button id="modeStop" type="button">Qで止める</button></div>
+    <button id="cue" type="button">Q</button>
+    <div class="note" id="modeNote">Qを押してもタイマー・音源・動画は止まりません</div>
+
+    <div class="tools"><button id="saveProject" class="ok" type="button">曲を保存</button><button id="copy" type="button">Qリストをコピー</button><button id="clear" type="button">Qだけ全削除</button></div>
+    <div class="listOptions"><button id="displayOrder" class="active" type="button">表示：最新Qが上</button><button id="copyOrder" type="button">コピー：Q1→最新</button></div>
+    <div id="list"><div class="empty">まだQがありません</div></div>
+  </section>
+
+  <section id="screenLive" class="screen">
+    <div class="card">
+      <div class="liveSongSelect">
+        <button id="livePrev" type="button" aria-label="前の曲">←</button>
+        <div class="liveSongCenter"><div class="liveSong" id="liveSongTitle">曲を選択</div><div class="liveSongIndex" id="liveSongIndex">保存した曲から選択</div></div>
+        <button id="liveNextSong" type="button" aria-label="次の曲">→</button>
+      </div>
+      <div class="liveHead"><div class="sub">SHOW TIMER</div><div class="liveTime" id="liveTimer">00:00</div></div>
+      <div class="liveControls" style="margin-top:12px"><button id="livePlay" class="primary" type="button">▶ START</button><button id="liveReset" type="button">RESET</button></div>
+      <div id="liveCountdown" class="liveCountdown">--.-</div>
+      <div class="liveCountdownLabel">NEXTまで</div>
+      <div class="liveGrid" style="margin-top:12px">
+        <div class="liveCard now" id="liveNow"></div>
+        <div class="liveCard next" id="liveNext"></div>
+        <div class="liveCard" id="liveNext2"></div>
+      </div>
+      <div class="sectionHint">SHOWは音源・動画を使わず、保存されたQのタイムだけに同期します。← → で保存した曲を直接切り替えられます。</div>
+    </div>
+  </section>
+</div>
+<script>
+(function(){
+"use strict";
+var STORAGE_KEY="qtimer.projects.v11";
+var DB_NAME="qtimer-media-v11", DB_STORE="media";
+var currentProject=null, currentFile=null, objectURLs=[];
+var mediaType="none", mediaDuration=0, zeroOffsetMs=0, countEnabled=false, countMode="dance", tapTimes=[];
+var cues=[], newestFirst=true, copyNewestFirst=false, stopOnCue=false, loopRangeIndex=null, cueTouchLock=false;
+var running=false, startedAt=0, carried=0, timerLoop=null, liveLastPaint=0;
+var liveProject=null,liveCues=[],liveRunning=false,liveStartedAt=0,liveCarried=0,liveTimerLoop=null;
+var waveDuration=0, wavePxPerSec=80, waveReady=false, waveSyncLock=false;
+
+function $(id){return document.getElementById(id)}
+var statusEl=$("status"), saveState=$("saveState"), songName=$("songName"), bpmEl=$("bpm"), beatsPerBarEl=$("beatsPerBar");
+var settingsAudio=$("settingsAudio"), settingsVideo=$("settingsVideo"), editorAudio=$("editorAudio"), editorVideo=$("editorVideo");
+
+function uid(){return "p_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
+function fmt(ms, millis){ms=Math.max(0,Math.floor(ms));var min=Math.floor(ms/60000),sec=Math.floor(ms/1000)%60;var s=String(min).padStart(2,"0")+":"+String(sec).padStart(2,"0");if(millis)s+="."+String(ms%1000).padStart(3,"0");return s}
+function markDirty(msg){saveState.textContent="未保存";saveState.style.background="var(--accent)";if(msg)statusEl.textContent=msg}
+function markSaved(){saveState.textContent="保存済み";saveState.style.background="var(--ok)"}
+function setStatus(msg){statusEl.textContent=msg}
+function loadProjectIndex(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]")||[]}catch(e){return []}}
+function writeProjectIndex(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr))}
+function safeBackupDate(){var d=new Date(),pad=function(n){return String(n).padStart(2,"0")};return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"_"+pad(d.getHours())+pad(d.getMinutes())}
+async function exportBackup(){
+  try{
+    if(currentProject&&saveState.textContent==="未保存"){await saveCurrentProject()}
+    var projects=loadProjectIndex();
+    var payload={app:"Q TIMER",format:"qtimer-backup",version:1,exportedAt:new Date().toISOString(),projects:projects};
+    var text=JSON.stringify(payload,null,2),name="Q_TIMER_backup_"+safeBackupDate()+".json";
+    var file=new File([text],name,{type:"application/json"});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:"Q TIMER バックアップ"});
+      setStatus("バックアップを共有しました。「ファイルに保存」を選べます");
+    }else{
+      var blob=new Blob([text],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+      a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},3000);
+      setStatus("バックアップを書き出しました");
+    }
+  }catch(e){
+    if(e&&e.name==="AbortError"){setStatus("バックアップ保存をキャンセルしました");return}
+    console.error(e);alert("バックアップを保存できませんでした");
+  }
+}
+async function importBackupFile(file){
+  if(!file)return;
+  try{
+    var text=await file.text(),data=JSON.parse(text),projects;
+    if(Array.isArray(data))projects=data;
+    else if(data&&data.format==="qtimer-backup"&&Array.isArray(data.projects))projects=data.projects;
+    else throw new Error("invalid backup");
+    if(!projects.every(function(p){return p&&typeof p==="object"&&p.id&&Array.isArray(p.cues||[])}))throw new Error("invalid projects");
+    var ok=confirm("バックアップから"+projects.length+"曲を復元します。現在の曲ファイル一覧はバックアップ内容に置き換わります。よろしいですか？");
+    if(!ok){setStatus("復元をキャンセルしました");return}
+    pauseAll();writeProjectIndex(projects);currentProject=null;currentFile=null;cues=[];clearMediaElements();resetWave();renderProjectList();markSaved();showScreen("Library");
+    setStatus(projects.length+"曲をバックアップから復元しました");
+    alert("復元しました。音源・動画が表示されない曲は、設定から元のファイルを再選択してください。");
+  }catch(e){console.error(e);alert("このファイルはQ TIMERのバックアップとして読み込めませんでした")}
+}
+function snapshot(){return {id:currentProject&&currentProject.id?currentProject.id:uid(),name:(songName.value||"").trim()||"名称未設定",mediaName:currentFile?currentFile.name:(currentProject&&currentProject.mediaName)||"",mediaType:mediaType,zeroOffsetMs:zeroOffsetMs,countEnabled:countEnabled,countMode:countMode,bpm:parseFloat(bpmEl.value)||120,beatsPerBar:parseInt(beatsPerBarEl.value,10)||4,cues:cues.map(function(c){return {time:c.time,name:c.name||"",memo:c.memo||"",fade:c.fade==null?"0":String(c.fade)}}),updatedAt:Date.now()}}
+
+function openDb(){return new Promise(function(resolve,reject){var req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=function(){var db=req.result;if(!db.objectStoreNames.contains(DB_STORE))db.createObjectStore(DB_STORE)};req.onsuccess=function(){resolve(req.result)};req.onerror=function(){reject(req.error)}})}
+async function dbPutMedia(id,file){if(!file)return;var db=await openDb();return new Promise(function(resolve,reject){var tx=db.transaction(DB_STORE,"readwrite");tx.objectStore(DB_STORE).put(file,id);tx.oncomplete=function(){db.close();resolve()};tx.onerror=function(){db.close();reject(tx.error)}})}
+async function dbGetMedia(id){var db=await openDb();return new Promise(function(resolve,reject){var tx=db.transaction(DB_STORE,"readonly"),req=tx.objectStore(DB_STORE).get(id);req.onsuccess=function(){db.close();resolve(req.result||null)};req.onerror=function(){db.close();reject(req.error)}})}
+async function dbDeleteMedia(id){try{var db=await openDb();await new Promise(function(resolve,reject){var tx=db.transaction(DB_STORE,"readwrite");tx.objectStore(DB_STORE).delete(id);tx.oncomplete=resolve;tx.onerror=function(){reject(tx.error)}});db.close()}catch(e){}}
+
+function showScreen(name){["Library","Settings","Editor","Live"].forEach(function(n){$("screen"+n).classList.toggle("active",n===name);$("nav"+n).classList.toggle("active",n===name)});if(name==="Library")renderProjectList();if(name==="Settings")refreshSettingsUI();if(name==="Editor")refreshEditorUI();if(name==="Live")renderPerformance()}
+$("navLibrary").onclick=function(){showScreen("Library")};$("navSettings").onclick=function(){if(!currentProject){newProject()}else showScreen("Settings")};$("navEditor").onclick=function(){if(!currentProject){newProject()}else showScreen("Editor")};$("navLive").onclick=function(){ensureLiveProject();showScreen("Live")};
+
+function newProject(){pauseAll();currentProject={id:uid(),name:"",mediaName:"",mediaType:"none",zeroOffsetMs:0,countEnabled:false,countMode:"dance",bpm:120,beatsPerBar:4,cues:[]};currentFile=null;mediaType="none";mediaDuration=0;zeroOffsetMs=0;countEnabled=false;countMode="dance";cues=[];songName.value="";bpmEl.value="120";beatsPerBarEl.value="4";clearMediaElements();resetWave();markDirty("新しい曲の設定を始めます");showScreen("Settings")}
+$("newProject").onclick=newProject;
+$("exportBackup").onclick=exportBackup;
+$("importBackup").addEventListener("change",function(){var f=this.files&&this.files[0];if(f)importBackupFile(f);this.value=""});
+
+function clearUrls(){objectURLs.forEach(function(u){try{URL.revokeObjectURL(u)}catch(e){}});objectURLs=[]}
+function clearMediaElements(){clearUrls();[settingsAudio,settingsVideo,editorAudio,editorVideo].forEach(function(m){try{m.pause()}catch(e){};m.removeAttribute("src");m.load();m.classList.add("hidden")});$("settingsMediaName").textContent="音源・動画なし";$("editorMediaName").textContent="メディアなし"}
+function guessMediaType(file){var type=(file&&file.type||"").toLowerCase(),name=(file&&file.name||"").toLowerCase();return (type.indexOf("video/")===0||/\.(mp4|mov|m4v|webm)$/i.test(name))?"video":"audio"}
+function setSrcForElement(el,file){var u=URL.createObjectURL(file);objectURLs.push(u);el.src=u;el.classList.remove("hidden");return u}
+async function setMedia(file, fromLoad){if(!file)return;pauseAll();currentFile=file;mediaType=guessMediaType(file);mediaDuration=0;clearMediaElements();if(mediaType==="video"){setSrcForElement(settingsVideo,file);setSrcForElement(editorVideo,file)}else{setSrcForElement(settingsAudio,file);setSrcForElement(editorAudio,file)}$("settingsMediaName").textContent=file.name||"選択したファイル";$("editorMediaName").textContent=file.name||"選択したファイル";if(!fromLoad){zeroOffsetMs=0;markDirty("メディアを読み込みました")};await buildWaveform(file);refreshSettingsUI();refreshEditorUI()}
+$("settingsMediaFile").addEventListener("change",function(){var f=this.files&&this.files[0];if(f)setMedia(f,false)});
+
+function activeSettingsMedia(){return mediaType==="audio"?settingsAudio:mediaType==="video"?settingsVideo:null}
+function activeEditorMedia(){return mediaType==="audio"?editorAudio:mediaType==="video"?editorVideo:null}
+function qElapsedFromMediaSec(sec){return sec*1000-zeroOffsetMs}
+function mediaSecFromQMs(ms){return (ms+zeroOffsetMs)/1000}
+function currentElapsed(){var m=activeEditorMedia();if(m)return qElapsedFromMediaSec(m.currentTime||0);return running?(Date.now()-startedAt)+carried:carried}
+function drawTimer(){var t=currentElapsed();$("timer").textContent=fmt(t,false)}
+function startLoop(){stopLoop();timerLoop=setInterval(drawTimer,20)}function stopLoop(){if(timerLoop!==null){clearInterval(timerLoop);timerLoop=null}}
+
+function refreshSettingsUI(){songName.value=currentProject&&songName.value===""&&currentProject.name?currentProject.name:songName.value;$("countOff").classList.toggle("active",!countEnabled);$("countOn").classList.toggle("active",countEnabled);$("countSettings").classList.toggle("hidden",!countEnabled);$("countDance").classList.toggle("active",countMode==="dance");$("countBars").classList.toggle("active",countMode==="bars");$("barField").classList.toggle("hidden",countMode!=="bars");$("zeroMediaTime").textContent="メディア "+fmt(zeroOffsetMs,true);if(currentFile)$("waveArea").classList.remove("hidden");else $("waveArea").classList.add("hidden")}
+function refreshEditorUI(){$("editorSongTitle").textContent=(songName.value||"").trim()||"曲名未設定";$("editorMediaName").textContent=currentFile?currentFile.name:((currentProject&&currentProject.mediaName)||"メディアなし");$("editorZeroInfo").textContent=zeroOffsetMs>0?"Q 0:00 = メディア "+fmt(zeroOffsetMs,true):"Q 0:00 = メディア先頭";render();drawTimer()}
+songName.addEventListener("input",function(){markDirty();refreshEditorUI()});bpmEl.addEventListener("input",function(){markDirty();render()});beatsPerBarEl.addEventListener("input",function(){markDirty();render()});
+$("countOff").onclick=function(){countEnabled=false;markDirty("カウントをOFFにしました");refreshSettingsUI();render()};$("countOn").onclick=function(){countEnabled=true;markDirty("カウントをONにしました");refreshSettingsUI();render()};$("countDance").onclick=function(){countMode="dance";markDirty();refreshSettingsUI();render()};$("countBars").onclick=function(){countMode="bars";markDirty();refreshSettingsUI();render()};
+
+var tapBtn=$("tap"),touchTapHandled=false;function registerTempoTap(){var t=Date.now();tapTimes.push(t);if(tapTimes.length>6)tapTimes.shift();if(tapTimes.length>=2){var diffs=[];for(var i=1;i<tapTimes.length;i++)diffs.push(tapTimes[i]-tapTimes[i-1]);var avg=diffs.reduce(function(a,b){return a+b},0)/diffs.length,v=60000/avg;if(v>=20&&v<=300){bpmEl.value=v.toFixed(1);markDirty("BPM "+v.toFixed(1));render()}}}
+tapBtn.addEventListener("touchend",function(e){e.preventDefault();touchTapHandled=true;registerTempoTap();setTimeout(function(){touchTapHandled=false},350)},{passive:false});tapBtn.addEventListener("click",function(e){if(touchTapHandled){e.preventDefault();return}registerTempoTap()});
+function normalizeDetectedBpm(v){while(v<75)v*=2;while(v>190)v/=2;return Math.round(v*10)/10}
+async function decodeFile(file){var buf=await file.arrayBuffer();var AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error("AudioContext unsupported");var ctx=new AC();try{var copy=buf.slice(0);var audioBuf=await new Promise(function(resolve,reject){var done=false;function ok(v){if(done)return;done=true;resolve(v)}function bad(e){if(done)return;done=true;reject(e)}var p=ctx.decodeAudioData(copy,ok,bad);if(p&&typeof p.then==="function")p.then(ok).catch(bad)});return audioBuf}finally{try{await ctx.close()}catch(e){}}}
+async function analyzeBpmFromFile(){var btn=$("analyzeBpm");if(!currentFile){setStatus("先に音源・動画を選んでください");return}btn.disabled=true;btn.textContent="解析中…";try{var audioBuf=await decodeFile(currentFile),sr=audioBuf.sampleRate,len=audioBuf.length,channels=audioBuf.numberOfChannels,maxSeconds=Math.min(90,audioBuf.duration),startSeconds=audioBuf.duration>35?Math.min(10,audioBuf.duration*0.12):0,start=Math.floor(startSeconds*sr),end=Math.min(len,Math.floor((startSeconds+maxSeconds)*sr)),hop=Math.max(1,Math.floor(sr/200)),env=[],prev=0;for(var i=start;i<end;i+=hop){var sum=0,n=0,blockEnd=Math.min(i+hop,end);for(var j=i;j<blockEnd;j+=2){var v=0;for(var c=0;c<channels;c++)v+=audioBuf.getChannelData(c)[j];v/=channels;sum+=Math.abs(v);n++}var e=n?sum/n:0,onset=Math.max(0,e-prev*0.92);env.push(onset);prev=e}if(env.length<500)throw new Error("too short");var mean=env.reduce(function(a,b){return a+b},0)/env.length;for(var k=0;k<env.length;k++)env[k]=Math.max(0,env[k]-mean*0.7);var rate=sr/hop,minB=55,maxB=210,minLag=Math.floor(rate*60/maxB),maxLag=Math.ceil(rate*60/minB),bestLag=0,best=-1;for(var lag=minLag;lag<=maxLag;lag++){var score=0;for(var x=lag;x<env.length;x++)score+=env[x]*env[x-lag];if(score>best){best=score;bestLag=lag}}if(!bestLag||best<=0)throw new Error("no beat");var detected=normalizeDetectedBpm(60*rate/bestLag);bpmEl.value=detected.toFixed(1);markDirty("推定BPM "+detected.toFixed(1)+"（必要ならTAPで微調整）");render()}catch(err){console.error(err);setStatus("BPM自動解析できませんでした。TAP TEMPOで合わせてください")}finally{btn.disabled=false;btn.textContent="🎧 BPM自動解析"}}
+$("analyzeBpm").onclick=analyzeBpmFromFile;
+
+function resetWave(){waveReady=false;waveDuration=0;$("waveArea").classList.add("hidden");$("waveFallback").classList.add("hidden");var canvas=$("waveCanvas"),ctx=canvas.getContext("2d");ctx.clearRect(0,0,canvas.width,canvas.height);$("waveScroller").scrollLeft=0}
+async function buildWaveform(file){resetWave();$("waveArea").classList.remove("hidden");setStatus("波形を作成中…");try{var audioBuf=await decodeFile(file);waveDuration=audioBuf.duration||0;if(!waveDuration)throw new Error("no duration");var scroller=$("waveScroller"),viewport=Math.max(280,scroller.clientWidth||320),width=Math.max(viewport,Math.min(18000,Math.round(waveDuration*wavePxPerSec))),pad=Math.floor(viewport/2),totalWidth=width+pad*2,canvas=$("waveCanvas");canvas.width=totalWidth;canvas.height=108;canvas.style.width=totalWidth+"px";$("waveInner").style.width=totalWidth+"px";var ctx=canvas.getContext("2d"),data=audioBuf.getChannelData(0),mid=54,amp=45;ctx.clearRect(0,0,totalWidth,108);ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue("--text").trim()||"#fff";ctx.globalAlpha=.82;ctx.beginPath();var samples=Math.max(1,width),step=Math.max(1,Math.floor(data.length/samples));for(var x=0;x<samples;x++){var start=x*step,end=Math.min(data.length,start+step),min=1,max=-1;for(var j=start;j<end;j+=Math.max(1,Math.floor(step/16))){var v=data[j];if(v<min)min=v;if(v>max)max=v}var px=pad+x;ctx.moveTo(px,mid+min*amp);ctx.lineTo(px,mid+max*amp)}ctx.stroke();waveReady=true;$("waveFallback").classList.add("hidden");requestAnimationFrame(function(){seekWaveToMs(zeroOffsetMs)});setStatus("波形を左右に動かして0:00位置を決められます")}catch(err){console.error(err);waveReady=false;$("waveFallback").classList.remove("hidden");setStatus("波形は作れませんでした。再生バーで0:00位置を決められます")}}
+function waveScrollMs(){if(!waveReady||!waveDuration)return zeroOffsetMs;var sc=$("waveScroller"),viewport=sc.clientWidth||320,pad=viewport/2,px=sc.scrollLeft+viewport/2-pad;px=Math.max(0,Math.min(waveDuration*wavePxPerSec,px));return px/wavePxPerSec*1000}
+function seekWaveToMs(ms){if(!waveReady)return;var sc=$("waveScroller"),viewport=sc.clientWidth||320,pad=viewport/2,px=(Math.max(0,Math.min(waveDuration*1000,ms))/1000)*wavePxPerSec;waveSyncLock=true;sc.scrollLeft=Math.max(0,px+pad-viewport/2);setTimeout(function(){waveSyncLock=false},0);updateWaveReadout(ms)}
+function updateWaveReadout(ms){$("zeroMediaTime").textContent="メディア "+fmt(ms,true)}
+var waveScrollTimer=null;$("waveScroller").addEventListener("scroll",function(){if(waveSyncLock||!waveReady)return;clearTimeout(waveScrollTimer);var ms=waveScrollMs();updateWaveReadout(ms);var m=activeSettingsMedia();if(m){try{m.currentTime=ms/1000}catch(e){}}waveScrollTimer=setTimeout(function(){updateWaveReadout(waveScrollMs())},60)});
+$("zeroToStart").onclick=function(){zeroOffsetMs=0;var m=activeSettingsMedia();if(m){try{m.currentTime=0}catch(e){}}seekWaveToMs(0);markDirty("メディア先頭をQ 0:00に設定しました");refreshEditorUI()};
+$("zeroToCurrent").onclick=function(){var m=activeSettingsMedia(),ms=0;if(waveReady)ms=waveScrollMs();else if(m)ms=(m.currentTime||0)*1000;zeroOffsetMs=Math.max(0,ms);if(m){try{m.currentTime=zeroOffsetMs/1000}catch(e){}}seekWaveToMs(zeroOffsetMs);markDirty("Q 0:00 = メディア "+fmt(zeroOffsetMs,true));refreshEditorUI()};
+[settingsAudio,settingsVideo].forEach(function(m){m.addEventListener("loadedmetadata",function(){mediaDuration=m.duration||mediaDuration;if(!waveReady)updateWaveReadout(zeroOffsetMs)});m.addEventListener("timeupdate",function(){if(!waveReady)updateWaveReadout((m.currentTime||0)*1000)})});
+
+function bpm(){var v=parseFloat(bpmEl.value);return isFinite(v)&&v>0?v:120}function beatMs(){return 60000/bpm()}function countLabel(a,b){if(!countEnabled)return "";var beats=Math.max(0,Math.round((b-a)/beatMs()));if(countMode==="dance"){if(beats<8)return String(beats);var eights=Math.floor(beats/8),rem=beats%8;if(rem===0)return "8×"+eights;return "8×"+eights+"＋"+rem}else{var per=parseInt(beatsPerBarEl.value,10);if(!isFinite(per)||per<1)per=4;var bars=Math.floor(beats/per),rem2=beats%per;if(rem2===0)return bars+"小節";if(bars===0)return rem2+"拍";return bars+"小節＋"+rem2+"拍"}}
+
+async function saveCurrentProject(){if(!currentProject)currentProject={id:uid()};var p=snapshot();currentProject=p;var arr=loadProjectIndex(),idx=arr.findIndex(function(x){return x.id===p.id});if(idx>=0)arr[idx]=p;else arr.unshift(p);writeProjectIndex(arr);if(currentFile){try{await dbPutMedia(p.id,currentFile)}catch(e){console.error(e);setStatus("曲データは保存しました。メディアは容量制限で保存できない可能性があります")}}markSaved();setStatus("「"+p.name+"」を保存しました");renderProjectList();return p}
+$("saveSettings").onclick=saveCurrentProject;$("saveProject").onclick=saveCurrentProject;$("goEditor").onclick=async function(){if(!(songName.value||"").trim()){songName.value="名称未設定"}await saveCurrentProject();showScreen("Editor")};$("backSettings").onclick=function(){showScreen("Settings")};
+async function openProject(id,go){var arr=loadProjectIndex(),p=arr.find(function(x){return x.id===id});if(!p)return;pauseAll();currentProject=p;songName.value=p.name||"";mediaType=p.mediaType||"none";zeroOffsetMs=p.zeroOffsetMs||0;countEnabled=!!p.countEnabled;countMode=p.countMode||"dance";bpmEl.value=p.bpm||120;beatsPerBarEl.value=p.beatsPerBar||4;cues=Array.isArray(p.cues)?p.cues.map(function(c){return {time:c.time||0,name:c.name||"",memo:c.memo||"",fade:c.fade==null?"0":String(c.fade)}}):[];currentFile=null;clearMediaElements();resetWave();try{var f=await dbGetMedia(p.id);if(f)await setMedia(f,true);else{$("settingsMediaName").textContent=p.mediaName?"再選択が必要："+p.mediaName:"音源・動画なし";$("editorMediaName").textContent=p.mediaName?"再選択が必要："+p.mediaName:"メディアなし";mediaType=p.mediaType||"none"}}catch(e){console.error(e)}markSaved();refreshSettingsUI();refreshEditorUI();setStatus("「"+(p.name||"名称未設定")+"」を開きました");showScreen(go||"Editor")}
+async function deleteProject(id){if(!confirm("この曲ファイルを削除しますか？"))return;var arr=loadProjectIndex().filter(function(x){return x.id!==id});writeProjectIndex(arr);await dbDeleteMedia(id);if(currentProject&&currentProject.id===id){currentProject=null;currentFile=null;cues=[];clearMediaElements()}renderProjectList();setStatus("曲ファイルを削除しました")}
+function renderProjectList(){var arr=loadProjectIndex(),box=$("projectList");if(!arr.length){box.innerHTML='<div class="libraryEmpty">保存した曲はまだありません</div>';return}box.innerHTML=arr.sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)}).map(function(p){var meta=(p.countEnabled?(p.countMode==="bars"?"小節":"8カウント")+" / BPM "+(p.bpm||120):"カウントOFF")+" ・ Q"+(p.cues?p.cues.length:0);return '<div class="project"><div class="projectName">'+esc(p.name||"名称未設定")+'</div><div class="projectMeta">'+esc(p.mediaName||"メディアなし")+'<br>'+meta+'</div><div class="projectBtns"><button data-open="'+p.id+'">Qリストを開く</button><button data-set="'+p.id+'">設定を開く</button><button class="danger" data-del="'+p.id+'">削除</button></div></div>'}).join("");Array.prototype.forEach.call(box.querySelectorAll("[data-open]"),function(b){b.onclick=function(){openProject(this.getAttribute("data-open"),"Editor")}});Array.prototype.forEach.call(box.querySelectorAll("[data-set]"),function(b){b.onclick=function(){openProject(this.getAttribute("data-set"),"Settings")}});Array.prototype.forEach.call(box.querySelectorAll("[data-del]"),function(b){b.onclick=function(){deleteProject(this.getAttribute("data-del"))}})}
+function esc(s){return String(s||"").replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]})}
+
+async function playFromCurrent(){var m=activeEditorMedia();if(m){try{await m.play();running=true;$("start").textContent="Ⅱ PAUSE";setStatus("計測中");startLoop()}catch(e){setStatus("このファイルはSafariで再生できません")}}else{startedAt=Date.now();running=true;$("start").textContent="Ⅱ PAUSE";setStatus("計測中");startLoop()}}
+function pauseAll(){if(!running){var mm=activeEditorMedia();if(mm&&!mm.paused)mm.pause();return}var m=activeEditorMedia();if(m)m.pause();else carried=currentElapsed();running=false;stopLoop();drawTimer();$("start").textContent="▶ RESUME";setStatus("一時停止")}
+async function startButtonAction(){if(running){pauseAll();return}var m=activeEditorMedia(),atStart=currentElapsed()<50;if(cues.length===0&&atStart){cues.push({time:0,name:"",memo:""});render();markDirty()}if(m&&m.currentTime<mediaSecFromQMs(0)-0.05){try{m.currentTime=mediaSecFromQMs(0)}catch(e){}}await playFromCurrent()}
+$("start").onclick=startButtonAction;$("reset").onclick=function(){var m=activeEditorMedia();if(m){m.pause();try{m.currentTime=mediaSecFromQMs(0)}catch(e){}}loopRangeIndex=null;running=false;stopLoop();startedAt=0;carried=0;drawTimer();$("start").textContent=cues.length?"▶ START":"▶ START + Q1";setStatus("Q 0:00位置に戻しました")};
+$("modeContinue").onclick=function(){stopOnCue=false;this.classList.add("active");$("modeStop").classList.remove("active");$("modeNote").textContent="Qを押してもタイマー・音源・動画は止まりません"};$("modeStop").onclick=function(){stopOnCue=true;this.classList.add("active");$("modeContinue").classList.remove("active");$("modeNote").textContent="Qを押した瞬間にタイマー・音源・動画を停止します"};
+function flashCue(){var b=$("cue");b.classList.remove("flash");void b.offsetWidth;b.classList.add("flash");setTimeout(function(){b.classList.remove("flash")},140)}
+function addCueNow(){var t=Math.max(0,currentElapsed());cues.push({time:t,name:"",memo:"",fade:"0"});flashCue();if(navigator.vibrate){try{navigator.vibrate(18)}catch(e){}}setStatus("Q"+cues.length+" 追加 "+fmt(t,false));markDirty();render();if(stopOnCue&&running)setTimeout(pauseAll,0)}
+var cueBtn=$("cue");if(window.PointerEvent)cueBtn.addEventListener("pointerdown",function(e){e.preventDefault();addCueNow()},{passive:false});else{cueBtn.addEventListener("touchstart",function(e){e.preventDefault();cueTouchLock=true;addCueNow();setTimeout(function(){cueTouchLock=false},500)},{passive:false});cueBtn.addEventListener("click",function(e){if(cueTouchLock){e.preventDefault();return}addCueNow()})}
+$("clear").onclick=function(){if(cues.length&&confirm("Qリストだけ全削除しますか？")){cues=[];loopRangeIndex=null;render();markDirty("Qリストを削除しました")}};$("displayOrder").onclick=function(){newestFirst=!newestFirst;this.textContent=newestFirst?"表示：最新Qが上":"表示：Q1が上";this.classList.toggle("active",newestFirst);render()};$("copyOrder").onclick=function(){copyNewestFirst=!copyNewestFirst;this.textContent=copyNewestFirst?"コピー：最新→Q1":"コピー：Q1→最新";this.classList.toggle("active",copyNewestFirst)};
+$("copy").onclick=function(){if(!cues.length)return;var indices=[];for(var i=0;i<cues.length;i++)indices.push(i);if(copyNewestFirst)indices.reverse();var lines=[];indices.forEach(function(idx){var c=cues[idx],line="Q"+(idx+1)+"\t"+fmt(c.time,false)+"\tFade "+(c.fade==null||c.fade===""?"0":c.fade)+"s\t"+(c.name||"");if(c.memo)line+="\t"+c.memo;lines.push(line);if(countEnabled){if(!copyNewestFirst&&idx<cues.length-1)lines.push("  → "+countLabel(c.time,cues[idx+1].time));if(copyNewestFirst&&idx>0)lines.push("  ← "+countLabel(cues[idx-1].time,c.time))}});var text=lines.join("\n");if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(function(){setStatus("Qリストをコピーしました")}).catch(function(){prompt("コピーしてください",text)});else prompt("コピーしてください",text)};
+async function playCueRange(i){if(i<0||i>=cues.length-1)return;var m=activeEditorMedia();if(!m){setStatus("区間リピートは音源・動画選択時に使えます");return}if(loopRangeIndex===i){loopRangeIndex=null;m.pause();render();setStatus("リピート停止");return}loopRangeIndex=i;try{m.currentTime=mediaSecFromQMs(cues[i].time)}catch(e){}render();try{await m.play()}catch(e){setStatus("再生できませんでした")}}
+function render(){var list=$("list");if(!cues.length){list.innerHTML='<div class="empty">まだQがありません</div>';return}var indices=[];for(var z=0;z<cues.length;z++)indices.push(z);if(newestFirst)indices.reverse();list.innerHTML=indices.map(function(i){var c=cues[i],seg=(countEnabled&&i<cues.length-1)?'<div class="segment">→ '+esc(countLabel(c.time,cues[i+1].time))+'</div>':'',loop=(i<cues.length-1)?'<button type="button" class="loopBtn '+(loopRangeIndex===i?'active':'')+'" data-loop="'+i+'">'+(loopRangeIndex===i?'■ STOP':'↻ Q'+(i+1)+'→Q'+(i+2))+'</button>':'<span></span>';return '<div class="item '+(i===cues.length-1?'latest':'')+'"><div class="qn">Q'+(i+1)+'</div><button type="button" class="seekBtn" data-seek="'+i+'">'+fmt(c.time,false)+'</button><button type="button" class="nameBtn" data-n="'+i+'">'+esc(c.name||"名前を入力")+'</button>'+loop+'<button type="button" class="del" data-d="'+i+'">×</button><button type="button" class="fadeBtn" data-f="'+i+'">'+esc(c.fade==null||c.fade===""?"0":c.fade)+'s</button><button type="button" class="memoBtn" data-m="'+i+'">'+esc(c.memo||"メモを入力")+'</button>'+seg+'</div>'}).join("");Array.prototype.forEach.call(list.querySelectorAll("[data-loop]"),function(b){b.onclick=function(){playCueRange(parseInt(this.getAttribute("data-loop"),10))}});Array.prototype.forEach.call(list.querySelectorAll("[data-seek]"),function(b){b.onclick=function(){loopRangeIndex=null;var i=parseInt(this.getAttribute("data-seek"),10),m=activeEditorMedia(),t=cues[i].time;if(m){try{m.currentTime=mediaSecFromQMs(t)}catch(e){}drawTimer();render();setStatus("Q"+(i+1)+"へ移動")}else{if(running)pauseAll();carried=t;startedAt=Date.now();drawTimer();render();$("start").textContent="▶ RESUME"}}});function wireEdit(attr,key,placeholder){Array.prototype.forEach.call(list.querySelectorAll("["+attr+"]"),function(b){b.onclick=function(){var i=parseInt(this.getAttribute(attr.slice(6,-1)),10),old=cues[i][key]||"",inp=document.createElement("input");inp.type="text";inp.className="editInput";inp.value=old;this.replaceWith(inp);inp.focus();inp.select();var done=false;function save(){if(done)return;done=true;cues[i][key]=inp.value.trim();markDirty();render()}inp.onblur=save;inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){inp.value=old;inp.blur()}}}})}
+Array.prototype.forEach.call(list.querySelectorAll("[data-n]"),function(b){b.onclick=function(){editField(this,"data-n","name")}});Array.prototype.forEach.call(list.querySelectorAll("[data-m]"),function(b){b.onclick=function(){editField(this,"data-m","memo")}});Array.prototype.forEach.call(list.querySelectorAll("[data-f]"),function(b){b.onclick=function(){editFade(this)}});Array.prototype.forEach.call(list.querySelectorAll("[data-d]"),function(b){b.onclick=function(){var i=parseInt(this.getAttribute("data-d"),10);cues.splice(i,1);loopRangeIndex=null;markDirty();render()}})}
+function editField(btn,attr,key){var i=parseInt(btn.getAttribute(attr),10),old=cues[i][key]||"",inp=document.createElement("input");inp.type="text";inp.className="editInput";inp.value=old;btn.replaceWith(inp);inp.focus();inp.select();var done=false;function save(){if(done)return;done=true;cues[i][key]=inp.value.trim();markDirty();render()}inp.onblur=save;inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){inp.value=old;inp.blur()}}}
+function editFade(btn){var i=parseInt(btn.getAttribute("data-f"),10),old=cues[i].fade==null?"0":String(cues[i].fade),inp=document.createElement("input");inp.type="number";inp.inputMode="decimal";inp.min="0";inp.step="0.1";inp.className="editInput";inp.value=old;btn.replaceWith(inp);inp.focus();inp.select();var done=false;function save(){if(done)return;done=true;var v=inp.value.trim();if(v===""||!isFinite(parseFloat(v))||parseFloat(v)<0)v="0";cues[i].fade=String(parseFloat(v));markDirty();render()}inp.onblur=save;inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){inp.value=old;inp.blur()}}}
+function liveElapsed(){return liveRunning?(Date.now()-liveStartedAt)+liveCarried:liveCarried}
+function stopLiveLoop(){if(liveTimerLoop!==null){clearInterval(liveTimerLoop);liveTimerLoop=null}}
+function startLiveLoop(){stopLiveLoop();liveTimerLoop=setInterval(function(){if($("screenLive").classList.contains("active"))renderPerformance(liveElapsed())},50)}
+function resetLiveTimer(){liveRunning=false;stopLiveLoop();liveStartedAt=0;liveCarried=0;renderPerformance(0)}
+function liveProjects(){return loadProjectIndex().slice().sort(function(a,b){return (a.updatedAt||0)-(b.updatedAt||0)})}
+function selectLiveProject(id){var arr=liveProjects(),p=arr.find(function(x){return x.id===id});if(!p){liveProject=null;liveCues=[];resetLiveTimer();return}liveProject=p;liveCues=Array.isArray(p.cues)?p.cues.map(function(c){return {time:c.time||0,name:c.name||"",memo:c.memo||"",fade:c.fade==null?"0":String(c.fade)}}):[];resetLiveTimer();setStatus("SHOW：『"+(p.name||"名称未設定")+"』")}
+function ensureLiveProject(){var arr=liveProjects();if(!arr.length){liveProject=null;liveCues=[];resetLiveTimer();setStatus("SHOWで使う保存済みの曲がありません");return}if(liveProject&&arr.some(function(p){return p.id===liveProject.id}))return;var id=currentProject&&arr.some(function(p){return p.id===currentProject.id})?currentProject.id:arr[0].id;selectLiveProject(id)}
+function moveLiveProject(step){var arr=liveProjects();if(!arr.length){ensureLiveProject();return}var idx=liveProject?arr.findIndex(function(p){return p.id===liveProject.id}):-1;if(idx<0)idx=0;idx=(idx+step+arr.length)%arr.length;selectLiveProject(arr[idx].id)}
+function liveCardHtml(label,index){if(index<0||index>=liveCues.length)return '<div class="liveLabel">'+label+'</div><div class="liveEmpty">—</div>';var c=liveCues[index];return '<div class="liveLabel">'+label+'</div><div class="liveQrow"><div class="liveQ">Q'+(index+1)+'</div><div class="liveName">'+esc(c.name||"名称未設定")+'</div></div><div class="liveMeta"><span>'+fmt(c.time,false)+'</span><span>FADE '+esc(c.fade==null||c.fade===""?"0":c.fade)+'s</span></div><div class="liveMemo">'+esc(c.memo||"")+'</div>'}
+function renderPerformance(t){if(t==null)t=Math.max(0,liveElapsed());var arr=liveProjects(),idx=liveProject?arr.findIndex(function(p){return p.id===liveProject.id}):-1;$("liveSongTitle").textContent=liveProject?(liveProject.name||"名称未設定"):"曲を選択";$("liveSongIndex").textContent=liveProject&&idx>=0?(idx+1)+" / "+arr.length:"保存した曲から選択";$("liveTimer").textContent=fmt(t,false);if(!liveCues.length){$("liveNow").innerHTML=liveCardHtml("NOW",-1);$("liveNext").innerHTML=liveCardHtml("NEXT",-1);$("liveNext2").innerHTML=liveCardHtml("NEXT +1",-1);$("liveCountdown").textContent=liveProject?"--.-":"NO FILE";$("livePlay").textContent=liveRunning?"Ⅱ PAUSE":"▶ START";return}var now=-1;for(var i=0;i<liveCues.length;i++){if(liveCues[i].time<=t+5)now=i;else break}var next=now+1,next2=now+2;$("liveNow").innerHTML=liveCardHtml("NOW",now);$("liveNext").innerHTML=liveCardHtml("NEXT",next);$("liveNext2").innerHTML=liveCardHtml("NEXT +1",next2);if(next<liveCues.length){var sec=Math.max(0,(liveCues[next].time-t)/1000);$("liveCountdown").textContent=(sec<100?sec.toFixed(1):Math.floor(sec))+"s"}else $("liveCountdown").textContent="END";$("livePlay").textContent=liveRunning?"Ⅱ PAUSE":"▶ "+(t>0?"RESUME":"START")}
+$("livePlay").onclick=function(){ensureLiveProject();if(!liveProject)return;if(liveRunning){liveCarried=liveElapsed();liveRunning=false;stopLiveLoop();setStatus("SHOW 一時停止")}else{liveStartedAt=Date.now();liveRunning=true;startLiveLoop();setStatus("SHOW 計測中")};renderPerformance()};
+$("liveReset").onclick=function(){resetLiveTimer();setStatus("SHOW 0:00に戻しました")};
+$("livePrev").onclick=function(){moveLiveProject(-1)};$("liveNextSong").onclick=function(){moveLiveProject(1)};
+[editorAudio,editorVideo].forEach(function(m){m.addEventListener("play",function(){running=true;$("start").textContent="Ⅱ PAUSE";setStatus("計測中");startLoop()});m.addEventListener("pause",function(){if(!m.ended){running=false;stopLoop();drawTimer();$("start").textContent="▶ RESUME"}});m.addEventListener("ended",function(){running=false;stopLoop();drawTimer();$("start").textContent="▶ RESUME";setStatus("再生終了")});m.addEventListener("timeupdate",function(){if(loopRangeIndex!==null&&loopRangeIndex<cues.length-1){var endSec=mediaSecFromQMs(cues[loopRangeIndex+1].time);if(m.currentTime>=endSec-0.025){try{m.currentTime=mediaSecFromQMs(cues[loopRangeIndex].time)}catch(e){}if(m.paused)m.play().catch(function(){})}}drawTimer()});m.addEventListener("seeked",drawTimer)});
+
+renderProjectList();drawTimer();render();
+})();
+</script>
+</body>
+</html>
