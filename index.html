@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0d10">
-<title>Q TIMER v13</title>
+<title>Q TIMER v15</title>
 <link rel="apple-touch-icon" href="icon.png">
 <style>
 :root{--bg:#0b0d10;--panel:#171b21;--panel2:#11161c;--line:#2b3139;--text:#fff;--muted:#8f98a6;--accent:#ffd21c;--ok:#34c759;--danger:#ff453a}
@@ -46,14 +46,14 @@ audio{width:100%;margin-top:9px;height:38px}video{width:100%;margin-top:9px;max-
 #cue{width:100%;min-height:56px;height:56px;margin-top:3px;border-radius:18px;background:var(--accent);color:#111;font-size:32px;font-weight:950;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .06s ease,filter .06s ease,box-shadow .06s ease}#cue:active{transform:scale(.985)}#cue.flash{filter:brightness(1.45);box-shadow:0 0 0 4px rgba(255,210,28,.35),0 0 38px rgba(255,210,28,.95);transform:scale(.99)}
 .note{text-align:center;color:var(--muted);font-size:11px;margin:9px 0 15px}.tools{display:flex;gap:8px;margin-bottom:8px}.tools button{flex:1;font-size:12px;padding:10px}.listOptions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.listOptions button{font-size:11px;padding:9px 7px;border-radius:11px;background:var(--panel2);border:1px solid var(--line)}.listOptions button.active{background:#232a33;border-color:#57616e}
 .item{display:grid;grid-template-columns:42px 74px 1fr 66px 30px;gap:6px;align-items:center;border-top:1px solid var(--line);padding:10px 2px}.item.latest{background:rgba(255,210,28,.045)}.qn{font-weight:900}.seekBtn,.nameBtn,.memoBtn,.del,.loopBtn{background:transparent}.seekBtn{padding:5px 0;text-align:left;color:#fff;font-variant-numeric:tabular-nums;font-size:13px;text-decoration:underline;text-decoration-color:#56606d;text-underline-offset:4px}.nameBtn,.memoBtn{padding:4px 0;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.nameBtn{font-size:13px}.memoBtn{font-size:11px;color:#bfc7d1;grid-column:3 / 5}.del{color:#838c98;padding:6px}.loopBtn{background:#232a33;color:#fff;padding:7px 6px;border-radius:9px;font-size:10px;white-space:nowrap}.loopBtn.active{background:var(--accent);color:#111}.segment{font-size:11px;color:#c8ced6;grid-column:2 / 5}.empty{text-align:center;color:#717b87;padding:28px 0}
-.editInput{width:100%;background:transparent;color:white;border:0;border-bottom:1px solid #666;border-radius:0;outline:none;font-size:14px;padding:4px 0}
+.editInput{width:100%;background:transparent;color:white;border:0;border-bottom:1px solid #666;border-radius:0;outline:none;font-size:16px;padding:4px 0;-webkit-text-size-adjust:100%}
 .fadeBtn{grid-column:2;grid-row:2;background:transparent;color:#d9dee5;padding:2px 0;text-align:left;font-size:11px;white-space:nowrap}.fadeBtn::before{content:"Fade ";color:#8f98a6}.memoBtn{grid-row:2;grid-column:3 / 5}.segment{grid-row:3}
 .liveHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.liveSong{font-size:20px;font-weight:950;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.liveTime{font-variant-numeric:tabular-nums;font-size:18px;font-weight:900;color:#dbe1e8}.liveGrid{display:grid;gap:10px}.liveCard{border:1px solid var(--line);border-radius:18px;padding:14px;background:#101419}.liveCard.now{border-color:#57616e}.liveCard.next{border-color:var(--accent);box-shadow:inset 0 0 0 1px rgba(255,210,28,.18)}.liveLabel{font-size:11px;font-weight:950;letter-spacing:.12em;color:var(--muted);margin-bottom:7px}.liveCard.next .liveLabel{color:var(--accent)}.liveQrow{display:flex;align-items:baseline;gap:10px}.liveQ{font-size:30px;font-weight:950;min-width:62px}.liveName{font-size:22px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.liveMeta{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#c4cbd4}.liveMemo{font-size:15px;font-weight:700;color:#e4e8ed;margin-top:10px;min-height:20px}.liveCountdown{font-size:44px;font-weight:950;font-variant-numeric:tabular-nums;text-align:center;margin:8px 0 2px}.liveCountdownLabel{text-align:center;font-size:11px;color:var(--muted)}.liveControls{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:10px}.liveControls button{min-height:50px}.liveEmpty{color:var(--muted);font-size:13px;padding:18px;text-align:center}
 
 .editorMediaHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}.editorMediaHead .name{font-size:12px;color:#dbe1e8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.miniBtn{font-size:11px;padding:8px 9px}
 @media(max-width:430px){.timer{font-size:50px}.item{grid-template-columns:38px 69px 1fr 58px 28px}.grid3{grid-template-columns:1fr 1fr}.grid3>*:last-child{grid-column:1 / -1}}
 
-.backupGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.backupGrid button,.backupGrid .fileBtn{width:100%;font-size:13px;padding:12px 10px}.backupNote{font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px}
+.liveSongSelect{display:grid;grid-template-columns:54px 1fr 54px;gap:8px;align-items:center;margin-bottom:12px}.liveSongSelect button{height:46px;font-size:24px;font-weight:900}.liveSongCenter{text-align:center;min-width:0}.liveSongIndex{font-size:11px;color:var(--muted);margin-top:3px}.backupGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.backupGrid button,.backupGrid .fileBtn{width:100%;font-size:13px;padding:12px 10px}.backupNote{font-size:11px;color:var(--muted);line-height:1.55;margin-top:8px}
 </style>
 </head>
 <body>
@@ -165,7 +165,12 @@ audio{width:100%;margin-top:9px;height:38px}video{width:100%;margin-top:9px;max-
 
   <section id="screenLive" class="screen">
     <div class="card">
-      <div class="liveHead"><div class="liveSong" id="liveSongTitle">曲名未設定</div><div class="liveTime" id="liveTimer">00:00</div></div>
+      <div class="liveSongSelect">
+        <button id="livePrev" type="button" aria-label="前の曲">←</button>
+        <div class="liveSongCenter"><div class="liveSong" id="liveSongTitle">曲を選択</div><div class="liveSongIndex" id="liveSongIndex">保存した曲から選択</div></div>
+        <button id="liveNextSong" type="button" aria-label="次の曲">→</button>
+      </div>
+      <div class="liveHead"><div class="sub">SHOW TIMER</div><div class="liveTime" id="liveTimer">00:00</div></div>
       <div id="liveCountdown" class="liveCountdown">--.-</div>
       <div class="liveCountdownLabel">NEXTまで</div>
       <div class="liveGrid" style="margin-top:12px">
@@ -174,7 +179,7 @@ audio{width:100%;margin-top:9px;height:38px}video{width:100%;margin-top:9px;max-
         <div class="liveCard" id="liveNext2"></div>
       </div>
       <div class="liveControls"><button id="livePlay" class="primary" type="button">▶ START</button><button id="liveReset" type="button">RESET</button></div>
-      <div class="sectionHint">曲の時間に合わせてNOW / NEXT / NEXT+1が自動で進みます。Fade・Q name・メモも表示します。</div>
+      <div class="sectionHint">SHOWは音源・動画を使わず、保存されたQのタイムだけに同期します。← → で保存した曲を直接切り替えられます。</div>
     </div>
   </section>
 </div>
@@ -187,6 +192,7 @@ var currentProject=null, currentFile=null, objectURLs=[];
 var mediaType="none", mediaDuration=0, zeroOffsetMs=0, countEnabled=false, countMode="dance", tapTimes=[];
 var cues=[], newestFirst=true, copyNewestFirst=false, stopOnCue=false, loopRangeIndex=null, cueTouchLock=false;
 var running=false, startedAt=0, carried=0, timerLoop=null, liveLastPaint=0;
+var liveProject=null,liveCues=[],liveRunning=false,liveStartedAt=0,liveCarried=0,liveTimerLoop=null;
 var waveDuration=0, wavePxPerSec=80, waveReady=false, waveSyncLock=false;
 
 function $(id){return document.getElementById(id)}
@@ -244,7 +250,7 @@ async function dbGetMedia(id){var db=await openDb();return new Promise(function(
 async function dbDeleteMedia(id){try{var db=await openDb();await new Promise(function(resolve,reject){var tx=db.transaction(DB_STORE,"readwrite");tx.objectStore(DB_STORE).delete(id);tx.oncomplete=resolve;tx.onerror=function(){reject(tx.error)}});db.close()}catch(e){}}
 
 function showScreen(name){["Library","Settings","Editor","Live"].forEach(function(n){$("screen"+n).classList.toggle("active",n===name);$("nav"+n).classList.toggle("active",n===name)});if(name==="Library")renderProjectList();if(name==="Settings")refreshSettingsUI();if(name==="Editor")refreshEditorUI();if(name==="Live")renderPerformance()}
-$("navLibrary").onclick=function(){showScreen("Library")};$("navSettings").onclick=function(){if(!currentProject){newProject()}else showScreen("Settings")};$("navEditor").onclick=function(){if(!currentProject){newProject()}else showScreen("Editor")};$("navLive").onclick=function(){if(!currentProject){setStatus("本番モードで使う曲を開いてください");showScreen("Library")}else showScreen("Live")};
+$("navLibrary").onclick=function(){showScreen("Library")};$("navSettings").onclick=function(){if(!currentProject){newProject()}else showScreen("Settings")};$("navEditor").onclick=function(){if(!currentProject){newProject()}else showScreen("Editor")};$("navLive").onclick=function(){ensureLiveProject();showScreen("Live")};
 
 function newProject(){pauseAll();currentProject={id:uid(),name:"",mediaName:"",mediaType:"none",zeroOffsetMs:0,countEnabled:false,countMode:"dance",bpm:120,beatsPerBar:4,cues:[]};currentFile=null;mediaType="none";mediaDuration=0;zeroOffsetMs=0;countEnabled=false;countMode="dance";cues=[];songName.value="";bpmEl.value="120";beatsPerBarEl.value="4";clearMediaElements();resetWave();markDirty("新しい曲の設定を始めます");showScreen("Settings")}
 $("newProject").onclick=newProject;
@@ -263,7 +269,7 @@ function activeEditorMedia(){return mediaType==="audio"?editorAudio:mediaType===
 function qElapsedFromMediaSec(sec){return sec*1000-zeroOffsetMs}
 function mediaSecFromQMs(ms){return (ms+zeroOffsetMs)/1000}
 function currentElapsed(){var m=activeEditorMedia();if(m)return qElapsedFromMediaSec(m.currentTime||0);return running?(Date.now()-startedAt)+carried:carried}
-function drawTimer(){var t=currentElapsed();$("timer").textContent=fmt(t,false);if($("screenLive").classList.contains("active")&&Date.now()-liveLastPaint>90){liveLastPaint=Date.now();renderPerformance(t)}}
+function drawTimer(){var t=currentElapsed();$("timer").textContent=fmt(t,false)}
 function startLoop(){stopLoop();timerLoop=setInterval(drawTimer,20)}function stopLoop(){if(timerLoop!==null){clearInterval(timerLoop);timerLoop=null}}
 
 function refreshSettingsUI(){songName.value=currentProject&&songName.value===""&&currentProject.name?currentProject.name:songName.value;$("countOff").classList.toggle("active",!countEnabled);$("countOn").classList.toggle("active",countEnabled);$("countSettings").classList.toggle("hidden",!countEnabled);$("countDance").classList.toggle("active",countMode==="dance");$("countBars").classList.toggle("active",countMode==="bars");$("barField").classList.toggle("hidden",countMode!=="bars");$("zeroMediaTime").textContent="メディア "+fmt(zeroOffsetMs,true);if(currentFile)$("waveArea").classList.remove("hidden");else $("waveArea").classList.add("hidden")}
@@ -312,9 +318,19 @@ function render(){var list=$("list");if(!cues.length){list.innerHTML='<div class
 Array.prototype.forEach.call(list.querySelectorAll("[data-n]"),function(b){b.onclick=function(){editField(this,"data-n","name")}});Array.prototype.forEach.call(list.querySelectorAll("[data-m]"),function(b){b.onclick=function(){editField(this,"data-m","memo")}});Array.prototype.forEach.call(list.querySelectorAll("[data-f]"),function(b){b.onclick=function(){editFade(this)}});Array.prototype.forEach.call(list.querySelectorAll("[data-d]"),function(b){b.onclick=function(){var i=parseInt(this.getAttribute("data-d"),10);cues.splice(i,1);loopRangeIndex=null;markDirty();render()}})}
 function editField(btn,attr,key){var i=parseInt(btn.getAttribute(attr),10),old=cues[i][key]||"",inp=document.createElement("input");inp.type="text";inp.className="editInput";inp.value=old;btn.replaceWith(inp);inp.focus();inp.select();var done=false;function save(){if(done)return;done=true;cues[i][key]=inp.value.trim();markDirty();render()}inp.onblur=save;inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){inp.value=old;inp.blur()}}}
 function editFade(btn){var i=parseInt(btn.getAttribute("data-f"),10),old=cues[i].fade==null?"0":String(cues[i].fade),inp=document.createElement("input");inp.type="number";inp.inputMode="decimal";inp.min="0";inp.step="0.1";inp.className="editInput";inp.value=old;btn.replaceWith(inp);inp.focus();inp.select();var done=false;function save(){if(done)return;done=true;var v=inp.value.trim();if(v===""||!isFinite(parseFloat(v))||parseFloat(v)<0)v="0";cues[i].fade=String(parseFloat(v));markDirty();render()}inp.onblur=save;inp.onkeydown=function(e){if(e.key==="Enter")inp.blur();if(e.key==="Escape"){inp.value=old;inp.blur()}}}
-function liveCardHtml(label,index){if(index<0||index>=cues.length)return '<div class="liveLabel">'+label+'</div><div class="liveEmpty">—</div>';var c=cues[index];return '<div class="liveLabel">'+label+'</div><div class="liveQrow"><div class="liveQ">Q'+(index+1)+'</div><div class="liveName">'+esc(c.name||"名称未設定")+'</div></div><div class="liveMeta"><span>'+fmt(c.time,false)+'</span><span>FADE '+esc(c.fade==null||c.fade===""?"0":c.fade)+'s</span></div><div class="liveMemo">'+esc(c.memo||"")+'</div>'}
-function renderPerformance(t){if(t==null)t=Math.max(0,currentElapsed());$("liveSongTitle").textContent=(songName.value||"").trim()||"曲名未設定";$("liveTimer").textContent=fmt(t,false);if(!cues.length){$("liveNow").innerHTML=liveCardHtml("NOW",-1);$("liveNext").innerHTML=liveCardHtml("NEXT",-1);$("liveNext2").innerHTML=liveCardHtml("NEXT +1",-1);$("liveCountdown").textContent="--.-";$("livePlay").textContent=running?"Ⅱ PAUSE":"▶ START";return}var now=-1;for(var i=0;i<cues.length;i++){if(cues[i].time<=t+5)now=i;else break}var next=now+1,next2=now+2;$("liveNow").innerHTML=liveCardHtml("NOW",now);$("liveNext").innerHTML=liveCardHtml("NEXT",next);$("liveNext2").innerHTML=liveCardHtml("NEXT +1",next2);if(next<cues.length){var sec=Math.max(0,(cues[next].time-t)/1000);$("liveCountdown").textContent=(sec<100?sec.toFixed(1):Math.floor(sec))+"s"}else $("liveCountdown").textContent="END";$("livePlay").textContent=running?"Ⅱ PAUSE":"▶ "+(t>0?"RESUME":"START")}
-$("livePlay").onclick=function(){if(running)pauseAll();else playFromCurrent();renderPerformance()};$("liveReset").onclick=function(){var m=activeEditorMedia();if(m){m.pause();try{m.currentTime=mediaSecFromQMs(0)}catch(e){}}loopRangeIndex=null;running=false;stopLoop();startedAt=0;carried=0;drawTimer();$("start").textContent=cues.length?"▶ START":"▶ START + Q1";setStatus("Q 0:00位置に戻しました");renderPerformance(0)};
+function liveElapsed(){return liveRunning?(Date.now()-liveStartedAt)+liveCarried:liveCarried}
+function stopLiveLoop(){if(liveTimerLoop!==null){clearInterval(liveTimerLoop);liveTimerLoop=null}}
+function startLiveLoop(){stopLiveLoop();liveTimerLoop=setInterval(function(){if($("screenLive").classList.contains("active"))renderPerformance(liveElapsed())},50)}
+function resetLiveTimer(){liveRunning=false;stopLiveLoop();liveStartedAt=0;liveCarried=0;renderPerformance(0)}
+function liveProjects(){return loadProjectIndex().slice().sort(function(a,b){return (a.updatedAt||0)-(b.updatedAt||0)})}
+function selectLiveProject(id){var arr=liveProjects(),p=arr.find(function(x){return x.id===id});if(!p){liveProject=null;liveCues=[];resetLiveTimer();return}liveProject=p;liveCues=Array.isArray(p.cues)?p.cues.map(function(c){return {time:c.time||0,name:c.name||"",memo:c.memo||"",fade:c.fade==null?"0":String(c.fade)}}):[];resetLiveTimer();setStatus("SHOW：『"+(p.name||"名称未設定")+"』")}
+function ensureLiveProject(){var arr=liveProjects();if(!arr.length){liveProject=null;liveCues=[];resetLiveTimer();setStatus("SHOWで使う保存済みの曲がありません");return}if(liveProject&&arr.some(function(p){return p.id===liveProject.id}))return;var id=currentProject&&arr.some(function(p){return p.id===currentProject.id})?currentProject.id:arr[0].id;selectLiveProject(id)}
+function moveLiveProject(step){var arr=liveProjects();if(!arr.length){ensureLiveProject();return}var idx=liveProject?arr.findIndex(function(p){return p.id===liveProject.id}):-1;if(idx<0)idx=0;idx=(idx+step+arr.length)%arr.length;selectLiveProject(arr[idx].id)}
+function liveCardHtml(label,index){if(index<0||index>=liveCues.length)return '<div class="liveLabel">'+label+'</div><div class="liveEmpty">—</div>';var c=liveCues[index];return '<div class="liveLabel">'+label+'</div><div class="liveQrow"><div class="liveQ">Q'+(index+1)+'</div><div class="liveName">'+esc(c.name||"名称未設定")+'</div></div><div class="liveMeta"><span>'+fmt(c.time,false)+'</span><span>FADE '+esc(c.fade==null||c.fade===""?"0":c.fade)+'s</span></div><div class="liveMemo">'+esc(c.memo||"")+'</div>'}
+function renderPerformance(t){if(t==null)t=Math.max(0,liveElapsed());var arr=liveProjects(),idx=liveProject?arr.findIndex(function(p){return p.id===liveProject.id}):-1;$("liveSongTitle").textContent=liveProject?(liveProject.name||"名称未設定"):"曲を選択";$("liveSongIndex").textContent=liveProject&&idx>=0?(idx+1)+" / "+arr.length:"保存した曲から選択";$("liveTimer").textContent=fmt(t,false);if(!liveCues.length){$("liveNow").innerHTML=liveCardHtml("NOW",-1);$("liveNext").innerHTML=liveCardHtml("NEXT",-1);$("liveNext2").innerHTML=liveCardHtml("NEXT +1",-1);$("liveCountdown").textContent=liveProject?"--.-":"NO FILE";$("livePlay").textContent=liveRunning?"Ⅱ PAUSE":"▶ START";return}var now=-1;for(var i=0;i<liveCues.length;i++){if(liveCues[i].time<=t+5)now=i;else break}var next=now+1,next2=now+2;$("liveNow").innerHTML=liveCardHtml("NOW",now);$("liveNext").innerHTML=liveCardHtml("NEXT",next);$("liveNext2").innerHTML=liveCardHtml("NEXT +1",next2);if(next<liveCues.length){var sec=Math.max(0,(liveCues[next].time-t)/1000);$("liveCountdown").textContent=(sec<100?sec.toFixed(1):Math.floor(sec))+"s"}else $("liveCountdown").textContent="END";$("livePlay").textContent=liveRunning?"Ⅱ PAUSE":"▶ "+(t>0?"RESUME":"START")}
+$("livePlay").onclick=function(){ensureLiveProject();if(!liveProject)return;if(liveRunning){liveCarried=liveElapsed();liveRunning=false;stopLiveLoop();setStatus("SHOW 一時停止")}else{liveStartedAt=Date.now();liveRunning=true;startLiveLoop();setStatus("SHOW 計測中")};renderPerformance()};
+$("liveReset").onclick=function(){resetLiveTimer();setStatus("SHOW 0:00に戻しました")};
+$("livePrev").onclick=function(){moveLiveProject(-1)};$("liveNextSong").onclick=function(){moveLiveProject(1)};
 [editorAudio,editorVideo].forEach(function(m){m.addEventListener("play",function(){running=true;$("start").textContent="Ⅱ PAUSE";setStatus("計測中");startLoop()});m.addEventListener("pause",function(){if(!m.ended){running=false;stopLoop();drawTimer();$("start").textContent="▶ RESUME"}});m.addEventListener("ended",function(){running=false;stopLoop();drawTimer();$("start").textContent="▶ RESUME";setStatus("再生終了")});m.addEventListener("timeupdate",function(){if(loopRangeIndex!==null&&loopRangeIndex<cues.length-1){var endSec=mediaSecFromQMs(cues[loopRangeIndex+1].time);if(m.currentTime>=endSec-0.025){try{m.currentTime=mediaSecFromQMs(cues[loopRangeIndex].time)}catch(e){}if(m.paused)m.play().catch(function(){})}}drawTimer()});m.addEventListener("seeked",drawTimer)});
 
 renderProjectList();drawTimer();render();
